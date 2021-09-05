@@ -2,13 +2,14 @@ const kAdapter = Symbol("adapter");
 
 class FileSystemHandle {
   /** @param {FileSystemHandle & {writable}} adapter */
-  constructor(adapter) {
+  constructor(adapter: any) {
     this.kind = adapter.kind;
     this.name = adapter.name;
     this[kAdapter] = adapter;
   }
 
   /** @type {FileSystemHandle} */
+  // @ts-expect-error ts-migrate(7008) FIXME: Member '[kAdapter]' implicitly has an 'any' type.
   [kAdapter];
 
   /** @type {string} */
@@ -17,7 +18,7 @@ class FileSystemHandle {
   kind;
 
   async queryPermission(options = {}) {
-    if (options.readable) return "granted";
+    if ((options as any).readable) return "granted";
     const handle = this[kAdapter];
     return handle.queryPermission
       ? await handle.queryPermission(options)
@@ -27,7 +28,7 @@ class FileSystemHandle {
   }
 
   async requestPermission(options = {}) {
-    if (options.readable) return "granted";
+    if ((options as any).readable) return "granted";
     const handle = this[kAdapter];
     return handle.writable ? "granted" : "denied";
   }
@@ -45,7 +46,7 @@ class FileSystemHandle {
   /**
    * @param {FileSystemHandle} other
    */
-  async isSameEntry(other) {
+  async isSameEntry(other: any) {
     if (this === other) return true;
     if (
       !other ||

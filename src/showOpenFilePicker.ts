@@ -1,6 +1,7 @@
 const def = {
   accepts: [],
 };
+// @ts-expect-error ts-migrate(7017) FIXME: Element implicitly has an 'any' type because type ... Remove this comment to see the full error message
 const native = globalThis.showOpenFilePicker;
 
 /**
@@ -14,17 +15,17 @@ const native = globalThis.showOpenFilePicker;
 async function showOpenFilePicker(options = {}) {
   const opts = { ...def, ...options };
 
-  if (native && !options._preferPolyfill) {
+  if (native && !(options as any)._preferPolyfill) {
     return native(opts);
   }
 
   const input = document.createElement("input");
   input.type = "file";
-  input.multiple = opts.multiple;
+  input.multiple = (opts as any).multiple;
   input.accept = opts.accepts
     .map((e) => [
-      ...(e.extensions || []).map((e) => "." + e),
-      ...(e.mimeTypes || []),
+      ...((e as any).extensions || []).map((e: any) => "." + e),
+      ...((e as any).mimeTypes || []),
     ])
     .flat()
     .join(",");

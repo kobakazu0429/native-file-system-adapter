@@ -12,7 +12,7 @@ export const errors = {
     "The object can not be modified in this way.",
     "InvalidModificationError",
   ],
-  SYNTAX: (m) => [
+  SYNTAX: (m: any) => [
     `Failed to execute 'write' on 'UnderlyingSinkBase': Invalid params passed. ${m}`,
     "SyntaxError",
   ],
@@ -30,18 +30,19 @@ export const config = {
   writable: globalThis.WritableStream,
 };
 
-export async function fromDataTransfer(entries) {
+export async function fromDataTransfer(entries: any) {
   console.warn(
     "deprecated fromDataTransfer - use `dt.items[0].getAsFileSystemHandle()` instead"
   );
   const [memory, sandbox, FileSystemDirectoryHandle] = await Promise.all([
     import("./adapters/memory.js"),
+    // @ts-expect-error ts-migrate(2307) FIXME: Cannot find module './adapters/sandbox.js' or its ... Remove this comment to see the full error message
     import("./adapters/sandbox.js"),
     import("./FileSystemDirectoryHandle.js"),
   ]);
 
   const folder = new memory.FolderHandle("", false);
-  folder._entries = entries.map((entry) =>
+  folder._entries = entries.map((entry: any) =>
     entry.isFile
       ? new sandbox.FileHandle(entry, false)
       : new sandbox.FolderHandle(entry, false)
@@ -50,7 +51,7 @@ export async function fromDataTransfer(entries) {
   return new FileSystemDirectoryHandle.default(folder);
 }
 
-export async function fromInput(input) {
+export async function fromInput(input: any) {
   const { FolderHandle, FileHandle } = await import("./adapters/memory.js");
   const dir = await import("./FileSystemDirectoryHandle.js");
   const file = await import("./FileSystemFileHandle.js");
@@ -65,7 +66,7 @@ export async function fromInput(input) {
       const path = file.webkitRelativePath.split("/");
       path.shift();
       const name = path.pop();
-      const dir = path.reduce((dir, path) => {
+      const dir = path.reduce((dir: any, path: any) => {
         if (!dir._entries[path])
           dir._entries[path] = new FolderHandle(path, false);
         return dir._entries[path];
@@ -75,7 +76,11 @@ export async function fromInput(input) {
     return new FileSystemDirectoryHandle(root);
   } else {
     const files = Array.from(input.files).map(
-      (file) => new FileSystemFileHandle(new FileHandle(file.name, file, false))
+      (file) =>
+        new FileSystemFileHandle(
+          // @ts-expect-error ts-migrate(2345) FIXME: Argument of type 'unknown' is not assignable to pa... Remove this comment to see the full error message
+          new FileHandle((file as any).name, file, false)
+        )
     );
     if (input.multiple) {
       return files;

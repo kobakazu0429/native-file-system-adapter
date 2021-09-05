@@ -1,3 +1,4 @@
+// @ts-expect-error ts-migrate(7017) FIXME: Element implicitly has an 'any' type because type ... Remove this comment to see the full error message
 const native = globalThis.showSaveFilePicker;
 
 /**
@@ -10,20 +11,23 @@ const native = globalThis.showSaveFilePicker;
  * @returns Promise<FileSystemDirectoryHandle>
  */
 async function showSaveFilePicker(options = {}) {
-  if (native && !options._preferPolyfill) {
+  if (native && !(options as any)._preferPolyfill) {
     return native(options);
   }
 
-  if (options._name) {
+  if ((options as any)._name) {
     console.warn("deprecated _name, spec now have `suggestedName`");
-    options.suggestedName = options._name;
+    (options as any).suggestedName = (options as any)._name;
   }
 
   const FileSystemFileHandle = await import("./FileSystemFileHandle.js").then(
     (d) => d.default
   );
+  // @ts-expect-error ts-migrate(2307) FIXME: Cannot find module './adapters/downloader.js' or i... Remove this comment to see the full error message
   const { FileHandle } = await import("./adapters/downloader.js");
-  return new FileSystemFileHandle(new FileHandle(options.suggestedName));
+  return new FileSystemFileHandle(
+    new FileHandle((options as any).suggestedName)
+  );
 }
 
 export default showSaveFilePicker;

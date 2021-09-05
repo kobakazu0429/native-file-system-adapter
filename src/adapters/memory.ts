@@ -1,23 +1,29 @@
 import { errors } from "../util.js";
 /** @type {typeof window.File} */
 const File =
+  // @ts-expect-error ts-migrate(1378) FIXME: Top-level 'await' expressions are only allowed whe... Remove this comment to see the full error message
   globalThis.File || (await import("fetch-blob/file.js").then((m) => m.File));
 /** @type {typeof window.Blob} */
 const Blob =
+  // @ts-expect-error ts-migrate(1378) FIXME: Top-level 'await' expressions are only allowed whe... Remove this comment to see the full error message
   globalThis.Blob || (await import("fetch-blob").then((m) => m.Blob));
 
 const { INVALID, GONE, MISMATCH, MOD_ERR, SYNTAX, SECURITY, DISALLOWED } =
   errors;
 
 export class Sink {
+  file: any;
+  fileHandle: any;
+  position: any;
+  size: any;
   /** @param {FileHandle} fileHandle */
-  constructor(fileHandle) {
+  constructor(fileHandle: any) {
     this.fileHandle = fileHandle;
     this.file = fileHandle.file;
     this.size = fileHandle.file.size;
     this.position = 0;
   }
-  write(chunk) {
+  write(chunk: any) {
     let file = this.file;
 
     if (typeof chunk === "object") {
@@ -102,6 +108,12 @@ export class Sink {
 }
 
 export class FileHandle {
+  deleted: any;
+  file: any;
+  kind: any;
+  name: any;
+  readable: any;
+  writable: any;
   constructor(name = "", file = new File([], name), writable = true) {
     this.file = file;
     this.name = name;
@@ -116,13 +128,13 @@ export class FileHandle {
     return this.file;
   }
 
-  createWritable(_opts) {
+  createWritable(_opts: any) {
     if (!this.writable) throw new DOMException(...DISALLOWED);
     if (this.deleted) throw new DOMException(...GONE);
     return new Sink(this);
   }
 
-  isSameEntry(other) {
+  isSameEntry(other: any) {
     return this === other;
   }
 
@@ -133,8 +145,14 @@ export class FileHandle {
 }
 
 export class FolderHandle {
+  _entries: any;
+  deleted: any;
+  kind: any;
+  name: any;
+  readable: any;
+  writable: any;
   /** @param {string} name */
-  constructor(name, writable = true) {
+  constructor(name: any, writable = true) {
     this.name = name;
     this.kind = "directory";
     this.deleted = false;
@@ -149,12 +167,12 @@ export class FolderHandle {
     yield* Object.entries(this._entries);
   }
 
-  isSameEntry(other) {
+  isSameEntry(other: any) {
     return this === other;
   }
 
   /** @param {string} name */
-  getDirectoryHandle(name, opts = {}) {
+  getDirectoryHandle(name: any, opts = {}) {
     if (this.deleted) throw new DOMException(...GONE);
     const entry = this._entries[name];
     if (entry) {
@@ -165,7 +183,7 @@ export class FolderHandle {
         return entry;
       }
     } else {
-      if (opts.create) {
+      if ((opts as any).create) {
         return (this._entries[name] = new FolderHandle(name));
       } else {
         throw new DOMException(...GONE);
@@ -174,28 +192,28 @@ export class FolderHandle {
   }
 
   /** @param {string} name */
-  getFileHandle(name, opts = {}) {
+  getFileHandle(name: any, opts = {}) {
     const entry = this._entries[name];
     const isFile = entry instanceof FileHandle;
     if (entry && isFile) return entry;
     if (entry && !isFile) throw new DOMException(...MISMATCH);
-    if (!entry && !opts.create) throw new DOMException(...GONE);
-    if (!entry && opts.create) {
+    if (!entry && !(opts as any).create) throw new DOMException(...GONE);
+    if (!entry && (opts as any).create) {
       return (this._entries[name] = new FileHandle(name));
     }
   }
 
-  removeEntry(name, opts) {
+  removeEntry(name: any, opts: any) {
     const entry = this._entries[name];
     if (!entry) throw new DOMException(...GONE);
     entry.destroy(opts.recursive);
     delete this._entries[name];
   }
 
-  destroy(recursive) {
-    for (let x of Object.values(this._entries)) {
+  destroy(recursive: any) {
+    for (const x of Object.values(this._entries)) {
       if (!recursive) throw new DOMException(...MOD_ERR);
-      x.destroy(recursive);
+      (x as any).destroy(recursive);
     }
     this._entries = {};
     this.deleted = true;
@@ -204,4 +222,4 @@ export class FolderHandle {
 
 const fs = new FolderHandle("");
 
-export default (_opts) => fs;
+export default (_opts: any) => fs;

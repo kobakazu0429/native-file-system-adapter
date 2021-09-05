@@ -1,3 +1,4 @@
+// @ts-expect-error ts-migrate(7017) FIXME: Element implicitly has an 'any' type because type ... Remove this comment to see the full error message
 const native = globalThis.showDirectoryPicker;
 
 /**
@@ -6,13 +7,13 @@ const native = globalThis.showDirectoryPicker;
  * @returns Promise<FileSystemDirectoryHandle>
  */
 async function showDirectoryPicker(options = {}) {
-  if (native && !options._preferPolyfill) {
+  if (native && !(options as any)._preferPolyfill) {
     return native(options);
   }
 
   const input = document.createElement("input");
   input.type = "file";
-  input.webkitdirectory = true;
+  (input as any).webkitdirectory = true;
 
   return new Promise((resolve) => {
     const p = import("./util.js").then((m) => m.fromInput);

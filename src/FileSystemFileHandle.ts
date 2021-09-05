@@ -4,12 +4,13 @@ import FileSystemWritableFileStream from "./FileSystemWritableFileStream.js";
 const kAdapter = Symbol("adapter");
 
 class FileSystemFileHandle extends FileSystemHandle {
-  constructor(adapter) {
+  constructor(adapter: any) {
     super(adapter);
     this[kAdapter] = adapter;
   }
 
   /** @type {FileSystemFileHandle} */
+  // @ts-expect-error ts-migrate(7008) FIXME: Member '[kAdapter]' implicitly has an 'any' type.
   [kAdapter];
 
   /**

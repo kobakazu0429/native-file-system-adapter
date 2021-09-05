@@ -3,6 +3,7 @@ import { errors } from "../util.js";
 import { join } from "path";
 import Blob from "fetch-blob";
 import { fileFrom } from "fetch-blob/from.js";
+// @ts-expect-error ts-migrate(7016) FIXME: Could not find a declaration file for module 'node... Remove this comment to see the full error message
 import DOMException from "node-domexception";
 
 // import mime from 'mime-types'
@@ -10,7 +11,10 @@ import DOMException from "node-domexception";
 const { INVALID, GONE, MISMATCH, MOD_ERR, SYNTAX } = errors;
 
 export class Sink {
-  constructor(fileHandle, size) {
+  fileHandle: any;
+  position: any;
+  size: any;
+  constructor(fileHandle: any, size: any) {
     this.fileHandle = fileHandle;
     this.size = size;
     this.position = 0;
@@ -18,7 +22,7 @@ export class Sink {
   async abort() {
     await this.fileHandle.close();
   }
-  async write(chunk) {
+  async write(chunk: any) {
     if (typeof chunk === "object") {
       if (chunk.type === "write") {
         if (Number.isInteger(chunk.position) && chunk.position >= 0) {
@@ -83,11 +87,13 @@ export class Sink {
 }
 
 export class FileHandle {
+  kind: any;
+  name: any;
   /**
    * @param {string} path
    * @param {string} name
    */
-  constructor(path, name) {
+  constructor(path: any, name: any) {
     this._path = path;
     this.name = name;
     this.kind = "file";
@@ -102,10 +108,11 @@ export class FileHandle {
     return fileFrom(this._path);
   }
 
-  isSameEntry(other) {
+  isSameEntry(other: any) {
     return this._path === this.#getPath.apply(other);
   }
 
+  // @ts-expect-error ts-migrate(18022) FIXME: A method cannot be named with a private identifier... Remove this comment to see the full error message
   #getPath() {
     return this._path;
   }
@@ -121,8 +128,10 @@ export class FileHandle {
 }
 
 export class FolderHandle {
+  kind: any;
+  name: any;
   /** @param {string} path */
-  constructor(path, name = "") {
+  constructor(path: any, name = "") {
     this.name = name;
     this.kind = "directory";
     this._path = path;
@@ -130,7 +139,7 @@ export class FolderHandle {
 
   _path = "";
 
-  isSameEntry(other) {
+  isSameEntry(other: any) {
     return this._path === other._path;
   }
 
@@ -140,7 +149,7 @@ export class FolderHandle {
       if (err.code === "ENOENT") throw new DOMException(...GONE);
       throw err;
     });
-    for (let name of items) {
+    for (const name of items) {
       const path = join(dir, name);
       const stat = await fs.lstat(path);
       if (stat.isFile()) {
@@ -151,28 +160,28 @@ export class FolderHandle {
     }
   }
 
-  async getDirectoryHandle(name, opts = {}) {
+  async getDirectoryHandle(name: any, opts = {}) {
     const path = join(this._path, name);
     const stat = await fs.lstat(path).catch((err) => {
       if (err.code !== "ENOENT") throw err;
     });
-    const isDirectory = stat?.isDirectory();
+    const isDirectory = (stat as any)?.isDirectory();
     if (stat && isDirectory) return new FolderHandle(path, name);
     if (stat && !isDirectory) throw new DOMException(...MISMATCH);
-    if (!opts.create) throw new DOMException(...GONE);
+    if (!(opts as any).create) throw new DOMException(...GONE);
     await fs.mkdir(path);
     return new FolderHandle(path, name);
   }
 
-  async getFileHandle(name, opts = {}) {
+  async getFileHandle(name: any, opts = {}) {
     const path = join(this._path, name);
     const stat = await fs.lstat(path).catch((err) => {
       if (err.code !== "ENOENT") throw err;
     });
-    const isFile = stat?.isFile();
+    const isFile = (stat as any)?.isFile();
     if (stat && isFile) return new FileHandle(path, name);
     if (stat && !isFile) throw new DOMException(...MISMATCH);
-    if (!opts.create) throw new DOMException(...GONE);
+    if (!(opts as any).create) throw new DOMException(...GONE);
     await (await fs.open(path, "w")).close();
     return new FileHandle(path, name);
   }
@@ -185,7 +194,7 @@ export class FolderHandle {
    * @param {string} name
    * @param {{ recursive: boolean; }} opts
    */
-  async removeEntry(name, opts) {
+  async removeEntry(name: any, opts: any) {
     const path = join(this._path, name);
     const stat = await fs.lstat(path).catch((err) => {
       if (err.code === "ENOENT") throw new DOMException(...GONE);
@@ -209,4 +218,4 @@ export class FolderHandle {
   }
 }
 
-export default (path) => new FolderHandle(path);
+export default (path: any) => new FolderHandle(path);
