@@ -1,25 +1,25 @@
-const native = globalThis.showDirectoryPicker
+const native = globalThis.showDirectoryPicker;
 
 /**
  * @param {Object} [options]
  * @param {boolean} [options._preferPolyfill] If you rather want to use the polyfill instead of the native
  * @returns Promise<FileSystemDirectoryHandle>
  */
-async function showDirectoryPicker (options = {}) {
+async function showDirectoryPicker(options = {}) {
   if (native && !options._preferPolyfill) {
-    return native(options)
+    return native(options);
   }
 
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.webkitdirectory = true
+  const input = document.createElement("input");
+  input.type = "file";
+  input.webkitdirectory = true;
 
-  return new Promise(resolve => {
-    const p = import('./util.js').then(m => m.fromInput)
-    input.onchange = () => resolve(p.then(fn => fn(input)))
-    input.click()
-  })
+  return new Promise((resolve) => {
+    const p = import("./util.js").then((m) => m.fromInput);
+    input.onchange = () => resolve(p.then((fn) => fn(input)));
+    input.click();
+  });
 }
 
-export default showDirectoryPicker
-export { showDirectoryPicker }
+export default showDirectoryPicker;
+export { showDirectoryPicker };

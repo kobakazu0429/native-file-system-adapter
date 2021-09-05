@@ -1,4 +1,4 @@
-const native = globalThis.showSaveFilePicker
+const native = globalThis.showSaveFilePicker;
 
 /**
  * @param {Object} [options]
@@ -9,20 +9,22 @@ const native = globalThis.showSaveFilePicker
  * @param {boolean} [options._preferPolyfill] If you rather want to use the polyfill instead of the native
  * @returns Promise<FileSystemDirectoryHandle>
  */
-async function showSaveFilePicker (options = {}) {
+async function showSaveFilePicker(options = {}) {
   if (native && !options._preferPolyfill) {
-    return native(options)
+    return native(options);
   }
 
   if (options._name) {
-    console.warn('deprecated _name, spec now have `suggestedName`')
-    options.suggestedName = options._name
+    console.warn("deprecated _name, spec now have `suggestedName`");
+    options.suggestedName = options._name;
   }
 
-  const FileSystemFileHandle = await import('./FileSystemFileHandle.js').then(d => d.default)
-  const { FileHandle } = await import('./adapters/downloader.js')
-  return new FileSystemFileHandle(new FileHandle(options.suggestedName))
+  const FileSystemFileHandle = await import("./FileSystemFileHandle.js").then(
+    (d) => d.default
+  );
+  const { FileHandle } = await import("./adapters/downloader.js");
+  return new FileSystemFileHandle(new FileHandle(options.suggestedName));
 }
 
-export default showSaveFilePicker
-export { showSaveFilePicker }
+export default showSaveFilePicker;
+export { showSaveFilePicker };
