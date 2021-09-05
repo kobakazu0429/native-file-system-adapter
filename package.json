@@ -9,11 +9,11 @@
   },
   "type": "module",
   "scripts": {
-    "test": "exit 0",
-    "test:browser": "airtap --local test/browser.js",
-    "test:node": "node test/test-node.js",
-    "test:deno": "node test/test-deno.js",
-    "build": "rm -rf dist && rollup -c rollup.config.js"
+    "lint": "npm run lint:eslint && npm run lint:prettier",
+    "test": "node test/test-node.js",
+    "build": "rm -rf dist && rollup -c rollup.config.js",
+    "lint:eslint": "eslint \"./{src,test}/**/*.{js,ts,tsx,svelte}\" --fix",
+    "lint:prettier": "prettier \"./{src,test}/**/*.{js,ts,tsx,svelte}\" --write"
   },
   "repository": {
     "type": "git",
@@ -50,12 +50,15 @@
     "node-domexception": "^1.0.0"
   },
   "devDependencies": {
+    "@kobakazu0429/eslint-config-typescript": "^2.1.3",
     "@types/filesystem": "^0.0.30",
+    "eslint": "^7.32.0",
     "rollup": "^2.51.1",
     "rollup-plugin-multi-input": "^1.3.1",
     "rollup-plugin-terser": "^7.0.2",
     "standard": "^16.0.3",
-    "tape": "^5.2.2"
+    "tape": "^5.2.2",
+    "typescript": "^4.4.2"
   },
   "funding": [
     {
