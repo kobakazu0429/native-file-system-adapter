@@ -118,10 +118,8 @@ const _Blob = class Blob {
    * The text() method in the Blob interface returns a Promise
    * that resolves with a string containing the contents of
    * the blob, interpreted as UTF-8.
-   *
-   * @return {Promise<string>}
    */
-  async text() {
+  async text(): Promise<string> {
     // More optimized than using this.arrayBuffer()
     // that requires twice as much ram
     const decoder = new TextDecoder();
@@ -138,10 +136,8 @@ const _Blob = class Blob {
    * The arrayBuffer() method in the Blob interface returns a
    * Promise that resolves with the contents of the blob as
    * binary data contained in an ArrayBuffer.
-   *
-   * @return {Promise<ArrayBuffer>}
    */
-  async arrayBuffer() {
+  async arrayBuffer(): Promise<ArrayBuffer> {
     // Easier way... Just a unnecessary overhead
     // const view = new Uint8Array(this.size);
     // await this.stream().getReader({mode: 'byob'}).read(view);
@@ -173,10 +169,6 @@ const _Blob = class Blob {
    * The Blob interface's slice() method creates and returns a
    * new Blob object which contains data from a subset of the
    * blob on which it's called.
-   *
-   * @param {number} [start]
-   * @param {number} [end]
-   * @param {string} [type]
    */
   slice(start = 0, end = this.size, type = "") {
     const { size } = this;

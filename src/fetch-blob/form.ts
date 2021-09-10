@@ -1,6 +1,6 @@
-import type { Stats } from "fs";
-import { stat } from "fs/promises";
 import { createReadStream } from "fs";
+import { stat } from "fs/promises";
+import type { Stats } from "fs";
 import { basename } from "path";
 
 import Blob from "./index";
@@ -59,9 +59,10 @@ class BlobDataItem {
         "[NotReadableError] The requested file could not be read, typically due to permission problems that have occurred after a reference to a file was acquired."
       );
     }
+
     yield* createReadStream(this.path, {
       start: this.start,
-      end: this.start + this.size - 1,
+      end: Math.max(this.start + this.size - 1, 0),
     });
   }
 

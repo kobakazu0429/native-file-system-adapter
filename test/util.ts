@@ -12,13 +12,6 @@ export function streamFromFetch(data) {
   });
 }
 
-// export function arrayEqual(a1, a2) {
-//   assert(
-//     JSON.stringify(a1) === JSON.stringify(a2),
-//     `expected ${a2} to equal ${a1}`
-//   );
-// }
-
 export function assert(r: boolean, msg = "Assertion failed") {
   if (!r) throw new Error(msg);
 }
@@ -62,9 +55,7 @@ export async function createEmptyFile(
 ) {
   const handle = await parent.getFileHandle(name, { create: true });
   // Make sure the file is empty.
-  const s = await getFileSize(handle);
-  if (s) console.log(name, s);
-  // assert((await getFileSize(handle)) === 0);
+  assert((await getFileSize(handle)) === 0);
   return handle;
 }
 
