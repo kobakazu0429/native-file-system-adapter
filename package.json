@@ -43,11 +43,10 @@
   ],
   "homepage": "https://github.com/jimmywarting/native-file-system-adapter#readme",
   "optionalDependencies": {
-    "web-streams-polyfill": "^2.1.1"
+    "web-streams-polyfill": "^3.1.0"
   },
   "dependencies": {
-    "fetch-blob": "^3.0.0",
-    "node-domexception": "^1.0.0"
+    "fetch-blob": "^3.0.0"
   },
   "devDependencies": {
     "@kobakazu0429/eslint-config-typescript": "^2.1.3",
