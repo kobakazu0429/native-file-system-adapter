@@ -1,50 +1,7 @@
-// TODO (jimmywarting): in the feature use conditional loading with top level await (requires 14.x)
-// Node has recently added whatwg stream into core
-
 import { ReadableStream } from "web-streams-polyfill";
+import { toIterator } from "./utils";
 
-/** @typedef {import('buffer').Blob} NodeBlob} */
-
-// 64 KiB (same size chrome slice theirs blob into Uint8array's)
-const POOL_SIZE = 65536;
-
-/** @param {(Blob | NodeBlob | Uint8Array)[]} parts */
-async function* toIterator(parts, clone = true) {
-  for (const part of parts) {
-    if ("stream" in part) {
-      yield* part.stream();
-    } else if (ArrayBuffer.isView(part)) {
-      if (clone) {
-        let position = part.byteOffset;
-        const end = part.byteOffset + part.byteLength;
-        while (position !== end) {
-          const size = Math.min(end - position, POOL_SIZE);
-          const chunk = part.buffer.slice(position, position + size);
-          position += chunk.byteLength;
-          yield new Uint8Array(chunk);
-        }
-      } else {
-        yield part;
-      }
-    } else {
-      /* c8 ignore start */
-      // For blobs that have arrayBuffer but no stream method (nodes buffer.Blob)
-      let position = 0;
-      while (position !== part.size) {
-        const chunk = part.slice(
-          position,
-          Math.min(part.size, position + POOL_SIZE)
-        );
-        const buffer = await chunk.arrayBuffer();
-        position += buffer.byteLength;
-        yield new Uint8Array(buffer);
-      }
-      /* c8 ignore end */
-    }
-  }
-}
-
-const _Blob = class Blob {
+export class MyBlob {
   /**
    * The Blob() constructor returns a new Blob object. The content
    * of the blob consists of the concatenation of the values given
@@ -57,7 +14,7 @@ const _Blob = class Blob {
     if (options === null) options = {};
 
     for (const element of blobParts) {
-      let part: Uint8Array | Blob;
+      let part: Uint8Array | MyBlob;
       if (ArrayBuffer.isView(element)) {
         part = new Uint8Array(
           element.buffer.slice(
@@ -67,7 +24,7 @@ const _Blob = class Blob {
         );
       } else if (element instanceof ArrayBuffer) {
         part = new Uint8Array(element.slice(0));
-      } else if (element instanceof Blob) {
+      } else if (element instanceof MyBlob) {
         part = element;
       } else {
         part = new TextEncoder().encode(element);
@@ -95,7 +52,7 @@ const _Blob = class Blob {
     );
   }
 
-  #parts: Array<Blob | Uint8Array> = [];
+  #parts: Array<MyBlob | Uint8Array> = [];
   #type = "";
   #size = 0;
 
@@ -209,7 +166,7 @@ const _Blob = class Blob {
       }
     }
 
-    const blob = new Blob([], { type: String(type).toLowerCase() });
+    const blob = new MyBlob([], { type: String(type).toLowerCase() });
     blob.#size = span;
     blob.#parts = blobParts;
 
@@ -219,14 +176,4 @@ const _Blob = class Blob {
   get [Symbol.toStringTag]() {
     return "Blob";
   }
-};
-
-Object.defineProperties(_Blob.prototype, {
-  size: { enumerable: true },
-  type: { enumerable: true },
-  slice: { enumerable: true },
-});
-
-/** @type {typeof globalThis.Blob} */
-export const Blob = _Blob;
-export default Blob;
+}

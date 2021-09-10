@@ -3,8 +3,8 @@ import { stat } from "fs/promises";
 import type { Stats } from "fs";
 import { basename } from "path";
 
-import Blob from "./index";
-import { File } from "./file";
+import { MyBlob } from "./blob";
+import { MyFile } from "./file";
 
 export const blobFrom = async (path: string, type: string) => {
   const s = await stat(path);
@@ -17,13 +17,13 @@ export const fileFrom = async (path: string, type?: string) => {
 };
 
 const fromBlob = (stat: Stats, path: string, type = "") => {
-  return new Blob([new BlobDataItem(path, 0, stat.size, stat.mtimeMs)], {
+  return new MyBlob([new BlobDataItem(path, 0, stat.size, stat.mtimeMs)], {
     type,
   });
 };
 
 const fromFile = (stat: Stats, path: string, type = "") => {
-  return new File(
+  return new MyFile(
     [new BlobDataItem(path, 0, stat.size, stat.mtimeMs)],
     basename(path),
     { type, lastModified: stat.mtimeMs }

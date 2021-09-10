@@ -1,6 +1,6 @@
-import Blob from "./index";
+import { MyBlob } from "./Blob";
 
-export class File extends Blob {
+export class MyFile extends MyBlob {
   constructor(
     fileBits: any[],
     fileName: string,
