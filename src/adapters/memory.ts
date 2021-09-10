@@ -1,28 +1,18 @@
-import { errors } from "../util.js";
-/** @type {typeof window.File} */
-const File =
-  // @ts-expect-error ts-migrate(1378) FIXME: Top-level 'await' expressions are only allowed whe... Remove this comment to see the full error message
-  globalThis.File || (await import("fetch-blob/file.js").then((m) => m.File));
-/** @type {typeof window.Blob} */
-const Blob =
-  // @ts-expect-error ts-migrate(1378) FIXME: Top-level 'await' expressions are only allowed whe... Remove this comment to see the full error message
-  globalThis.Blob || (await import("fetch-blob").then((m) => m.Blob));
-
-const { INVALID, GONE, MISMATCH, MOD_ERR, SYNTAX, SECURITY, DISALLOWED } =
-  errors;
+import { errors } from "../util";
 
 export class Sink {
-  file: any;
-  fileHandle: any;
-  position: any;
-  size: any;
-  /** @param {FileHandle} fileHandle */
-  constructor(fileHandle: any) {
+  constructor(fileHandle: FileHandle) {
     this.fileHandle = fileHandle;
     this.file = fileHandle.file;
     this.size = fileHandle.file.size;
     this.position = 0;
   }
+
+  fileHandle: FileHandle;
+  file: FileHandle["file"];
+  size: FileHandle["file"]["size"];
+  position: number;
+
   write(chunk: any) {
     let file = this.file;
 
@@ -39,20 +29,18 @@ export class Sink {
           }
         }
         if (!("data" in chunk)) {
-          throw new DOMException(...SYNTAX("write requires a data argument"));
+          throw new Error(errors.SYNTAX("write requires a data argument"));
         }
         chunk = chunk.data;
       } else if (chunk.type === "seek") {
         if (Number.isInteger(chunk.position) && chunk.position >= 0) {
           if (this.size < chunk.position) {
-            throw new DOMException(...INVALID);
+            throw new Error(errors.INVALID);
           }
           this.position = chunk.position;
           return;
         } else {
-          throw new DOMException(
-            ...SYNTAX("seek requires a position argument")
-          );
+          throw new Error(errors.SYNTAX("seek requires a position argument"));
         }
       } else if (chunk.type === "truncate") {
         if (Number.isInteger(chunk.size) && chunk.size >= 0) {
@@ -71,9 +59,7 @@ export class Sink {
           this.file = file;
           return;
         } else {
-          throw new DOMException(
-            ...SYNTAX("truncate requires a size argument")
-          );
+          throw new Error(errors.SYNTAX("truncate requires a size argument"));
         }
       }
     }
@@ -98,22 +84,17 @@ export class Sink {
     this.file = blob;
   }
   close() {
-    if (this.fileHandle.deleted) throw new DOMException(...GONE);
+    if (this.fileHandle.deleted) throw new Error(errors.GONE);
     this.fileHandle.file = this.file;
+    // @ts-ignore
     this.file = this.position = this.size = null;
-    if (this.fileHandle.onclose) {
-      this.fileHandle.onclose(this.fileHandle);
+    if ((this.fileHandle as any).onclose) {
+      (this.fileHandle as any).onclose(this.fileHandle);
     }
   }
 }
 
 export class FileHandle {
-  deleted: any;
-  file: any;
-  kind: any;
-  name: any;
-  readable: any;
-  writable: any;
   constructor(name = "", file = new File([], name), writable = true) {
     this.file = file;
     this.name = name;
@@ -123,14 +104,21 @@ export class FileHandle {
     this.readable = true;
   }
 
+  deleted: boolean;
+  file: File;
+  kind: string;
+  name: string;
+  readable: boolean;
+  writable: boolean;
+
   getFile() {
-    if (this.deleted) throw new DOMException(...GONE);
+    if (this.deleted) throw new Error(errors.GONE);
     return this.file;
   }
 
   createWritable(_opts: any) {
-    if (!this.writable) throw new DOMException(...DISALLOWED);
-    if (this.deleted) throw new DOMException(...GONE);
+    if (!this.writable) throw new Error(errors.DISALLOWED);
+    if (this.deleted) throw new Error(errors.GONE);
     return new Sink(this);
   }
 
@@ -140,30 +128,30 @@ export class FileHandle {
 
   destroy() {
     this.deleted = true;
+    // @ts-ignore
     this.file = null;
   }
 }
 
 export class FolderHandle {
-  _entries: any;
-  deleted: any;
-  kind: any;
-  name: any;
-  readable: any;
-  writable: any;
-  /** @param {string} name */
-  constructor(name: any, writable = true) {
+  constructor(name: string, writable = true) {
     this.name = name;
     this.kind = "directory";
     this.deleted = false;
-    /** @type {Object.<string, (FolderHandle|FileHandle)>} */
     this._entries = {};
     this.writable = writable;
     this.readable = true;
   }
 
+  _entries: Record<string, FolderHandle | FileHandle>;
+  kind: string;
+  name: string;
+  deleted: boolean;
+  readable: boolean;
+  writable: boolean;
+
   async *entries() {
-    if (this.deleted) throw new DOMException(...GONE);
+    if (this.deleted) throw new Error(errors.GONE);
     yield* Object.entries(this._entries);
   }
 
@@ -171,14 +159,13 @@ export class FolderHandle {
     return this === other;
   }
 
-  /** @param {string} name */
-  getDirectoryHandle(name: any, opts = {}) {
-    if (this.deleted) throw new DOMException(...GONE);
+  getDirectoryHandle(name: string, opts = {}) {
+    if (this.deleted) throw new Error(errors.GONE);
     const entry = this._entries[name];
     if (entry) {
       // entry exist
       if (entry instanceof FileHandle) {
-        throw new DOMException(...MISMATCH);
+        throw new Error(errors.MISMATCH);
       } else {
         return entry;
       }
@@ -186,33 +173,32 @@ export class FolderHandle {
       if ((opts as any).create) {
         return (this._entries[name] = new FolderHandle(name));
       } else {
-        throw new DOMException(...GONE);
+        throw new Error(errors.GONE);
       }
     }
   }
 
-  /** @param {string} name */
-  getFileHandle(name: any, opts = {}) {
+  getFileHandle(name: string, opts = {}) {
     const entry = this._entries[name];
     const isFile = entry instanceof FileHandle;
     if (entry && isFile) return entry;
-    if (entry && !isFile) throw new DOMException(...MISMATCH);
-    if (!entry && !(opts as any).create) throw new DOMException(...GONE);
+    if (entry && !isFile) throw new Error(errors.MISMATCH);
+    if (!entry && !(opts as any).create) throw new Error(errors.GONE);
     if (!entry && (opts as any).create) {
       return (this._entries[name] = new FileHandle(name));
     }
   }
 
-  removeEntry(name: any, opts: any) {
+  removeEntry(name: string, opts: any) {
     const entry = this._entries[name];
-    if (!entry) throw new DOMException(...GONE);
+    if (!entry) throw new Error(errors.GONE);
     entry.destroy(opts.recursive);
     delete this._entries[name];
   }
 
-  destroy(recursive: any) {
+  destroy(recursive: boolean) {
     for (const x of Object.values(this._entries)) {
-      if (!recursive) throw new DOMException(...MOD_ERR);
+      if (!recursive) throw new Error(errors.MOD_ERR);
       (x as any).destroy(recursive);
     }
     this._entries = {};
@@ -220,6 +206,4 @@ export class FolderHandle {
   }
 }
 
-const fs = new FolderHandle("");
-
-export default (_opts: any) => fs;
+export default (_opts: any) => new FolderHandle("");

@@ -1,52 +1,42 @@
 const kAdapter = Symbol("adapter");
 
 class FileSystemHandle {
-  /** @param {FileSystemHandle & {writable}} adapter */
-  constructor(adapter: any) {
+  constructor(adapter: FileSystemHandle & { writable: boolean }) {
     this.kind = adapter.kind;
     this.name = adapter.name;
     this[kAdapter] = adapter;
   }
 
-  /** @type {FileSystemHandle} */
-  // @ts-expect-error ts-migrate(7008) FIXME: Member '[kAdapter]' implicitly has an 'any' type.
-  [kAdapter];
+  [kAdapter]: FileSystemHandle & { writable: boolean };
 
-  /** @type {string} */
-  name;
-  /** @type {('file'|'directory')} */
-  kind;
+  name: string;
+  kind: "file" | "directory";
 
-  async queryPermission(options = {}) {
-    if ((options as any).readable) return "granted";
-    const handle = this[kAdapter];
-    return handle.queryPermission
-      ? await handle.queryPermission(options)
-      : handle.writable
+  async queryPermission(
+    options: { readable?: boolean; writable?: boolean } = {}
+  ) {
+    if (options.readable) return "granted";
+    return this[kAdapter].queryPermission
+      ? await this[kAdapter].queryPermission(options)
+      : this[kAdapter].writable
       ? "granted"
       : "denied";
   }
 
-  async requestPermission(options = {}) {
-    if ((options as any).readable) return "granted";
+  async requestPermission(options: { readable?: boolean } = {}) {
+    if (options.readable) return "granted";
     const handle = this[kAdapter];
     return handle.writable ? "granted" : "denied";
   }
 
   /**
    * Attempts to remove the entry represented by handle from the underlying file system.
-   *
-   * @param {object} options
-   * @param {boolean} [options.recursive=false]
    */
-  async remove(options = {}) {
+  async remove(options: { recursive: boolean } = { recursive: false }) {
     await this[kAdapter].remove(options);
   }
 
-  /**
-   * @param {FileSystemHandle} other
-   */
-  async isSameEntry(other: any) {
+  async isSameEntry(other: FileSystemHandle): Promise<boolean> {
     if (this === other) return true;
     if (
       !other ||

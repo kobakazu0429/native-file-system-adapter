@@ -1,13 +1,12 @@
-// @ts-expect-error ts-migrate(7017) FIXME: Element implicitly has an 'any' type because type ... Remove this comment to see the full error message
+import type { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
+import { fromInput } from "./util";
+
 const native = globalThis.showDirectoryPicker;
 
-/**
- * @param {Object} [options]
- * @param {boolean} [options._preferPolyfill] If you rather want to use the polyfill instead of the native
- * @returns Promise<FileSystemDirectoryHandle>
- */
-async function showDirectoryPicker(options = {}) {
-  if (native && !(options as any)._preferPolyfill) {
+export async function showDirectoryPicker(
+  options: { _preferPolyfill?: boolean } = {}
+): Promise<FileSystemDirectoryHandle> {
+  if (native && !options._preferPolyfill) {
     return native(options);
   }
 
@@ -16,11 +15,7 @@ async function showDirectoryPicker(options = {}) {
   (input as any).webkitdirectory = true;
 
   return new Promise((resolve) => {
-    const p = import("./util.js").then((m) => m.fromInput);
-    input.onchange = () => resolve(p.then((fn) => fn(input)));
+    input.onchange = () => resolve(fromInput(input) as any);
     input.click();
   });
 }
-
-export default showDirectoryPicker;
-export { showDirectoryPicker };

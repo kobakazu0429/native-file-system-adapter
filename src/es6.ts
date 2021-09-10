@@ -1,11 +1,11 @@
-import showDirectoryPicker from "./showDirectoryPicker.js";
-import showOpenFilePicker from "./showOpenFilePicker.js";
-import showSaveFilePicker from "./showSaveFilePicker.js";
-import getOriginPrivateDirectory from "./getOriginPrivateDirectory.js";
-import FileSystemDirectoryHandle from "./FileSystemDirectoryHandle.js";
-import FileSystemFileHandle from "./FileSystemFileHandle.js";
-import FileSystemHandle from "./FileSystemHandle.js";
-import FileSystemWritableFileStream from "./FileSystemWritableFileStream.js";
+import { showDirectoryPicker } from "./showDirectoryPicker";
+import { showOpenFilePicker } from "./showOpenFilePicker";
+import showSaveFilePicker from "./showSaveFilePicker";
+import getOriginPrivateDirectory from "./getOriginPrivateDirectory";
+import { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
+import FileSystemFileHandle from "./FileSystemFileHandle";
+import FileSystemHandle from "./FileSystemHandle";
+import FileSystemWritableFileStream from "./FileSystemWritableFileStream";
 
 export {
   FileSystemDirectoryHandle,

@@ -1,21 +1,28 @@
+import { fromInput } from "./util";
+import type { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
+import type FileSystemFileHandle from "./FileSystemFileHandle";
+
 const def = {
   accepts: [],
 };
-// @ts-expect-error ts-migrate(7017) FIXME: Element implicitly has an 'any' type because type ... Remove this comment to see the full error message
+
 const native = globalThis.showOpenFilePicker;
 
-/**
- * @param {Object} [options]
- * @param {boolean} [options.multiple] If you want to allow more than one file
- * @param {boolean} [options.excludeAcceptAllOption=false] Prevent user for selecting any
- * @param {Object[]} [options.accepts] Files you want to accept
- * @param {boolean} [options._preferPolyfill] If you rather want to use the polyfill instead of the native
- * @returns Promise<FileSystemDirectoryHandle>
- */
-async function showOpenFilePicker(options = {}) {
+interface Options {
+  multiple: boolean;
+  excludeAcceptAllOption: boolean;
+  accepts: any[];
+  _preferPolyfill: boolean;
+}
+
+export async function showOpenFilePicker(
+  options: Options = {} as Options
+): Promise<
+  FileSystemDirectoryHandle | FileSystemFileHandle | FileSystemFileHandle[]
+> {
   const opts = { ...def, ...options };
 
-  if (native && !(options as any)._preferPolyfill) {
+  if (native && !options._preferPolyfill) {
     return native(opts);
   }
 
@@ -31,11 +38,7 @@ async function showOpenFilePicker(options = {}) {
     .join(",");
 
   return new Promise((resolve) => {
-    const p = import("./util.js").then((m) => m.fromInput);
-    input.onchange = () => resolve(p.then((fn) => fn(input)));
+    input.onchange = () => resolve(fromInput(input));
     input.click();
   });
 }
-
-export default showOpenFilePicker;
-export { showOpenFilePicker };

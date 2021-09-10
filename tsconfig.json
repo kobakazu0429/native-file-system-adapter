@@ -8,8 +8,10 @@
     "checkJs": true,
     "removeComments": true,
     "emitDeclarationOnly": true,
-    "lib": ["es2019", "dom"],
-    "outDir": "./types/"
+    "lib": ["dom"],
+    "outDir": "./types/",
+    "esModuleInterop": true,
+    "moduleResolution": "node"
   },
-  "include": ["src/*.js"]
+  "include": ["./src"]
 }

@@ -1,5 +1,5 @@
-import FileSystemHandle from "./FileSystemHandle.js";
-import FileSystemWritableFileStream from "./FileSystemWritableFileStream.js";
+import FileSystemHandle from "./FileSystemHandle";
+import FileSystemWritableFileStream from "./FileSystemWritableFileStream";
 
 const kAdapter = Symbol("adapter");
 
@@ -9,25 +9,17 @@ class FileSystemFileHandle extends FileSystemHandle {
     this[kAdapter] = adapter;
   }
 
-  /** @type {FileSystemFileHandle} */
-  // @ts-expect-error ts-migrate(7008) FIXME: Member '[kAdapter]' implicitly has an 'any' type.
-  [kAdapter];
+  [kAdapter]: FileSystemFileHandle;
 
-  /**
-   * @param  {Object} [options={}]
-   * @param  {boolean} [options.keepExistingData]
-   * @returns {Promise<FileSystemWritableFileStream>}
-   */
-  async createWritable(options = {}) {
+  async createWritable(
+    options: { keepExistingData?: boolean } = {}
+  ): Promise<FileSystemWritableFileStream> {
     return new FileSystemWritableFileStream(
       await this[kAdapter].createWritable(options)
     );
   }
 
-  /**
-   * @returns {Promise<File>}
-   */
-  getFile() {
+  getFile(): Promise<File> {
     return Promise.resolve(this[kAdapter].getFile());
   }
 }

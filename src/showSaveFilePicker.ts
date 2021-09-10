@@ -1,4 +1,7 @@
-// @ts-expect-error ts-migrate(7017) FIXME: Element implicitly has an 'any' type because type ... Remove this comment to see the full error message
+import FileSystemFileHandle from "./FileSystemFileHandle";
+import type { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
+import { FileHandle } from "./adapters/downloader";
+
 const native = globalThis.showSaveFilePicker;
 
 /**
@@ -8,26 +11,30 @@ const native = globalThis.showSaveFilePicker;
  * @param {string} [options.suggestedName] the name to fall back to when using polyfill
  * @param {string} [options._name] the name to fall back to when using polyfill
  * @param {boolean} [options._preferPolyfill] If you rather want to use the polyfill instead of the native
- * @returns Promise<FileSystemDirectoryHandle>
+ * @returns
  */
-async function showSaveFilePicker(options = {}) {
-  if (native && !(options as any)._preferPolyfill) {
+
+interface Options {
+  excludeAcceptAllOption: boolean;
+  accepts: any;
+  suggestedName: string;
+  _name: string;
+  _preferPolyfill: boolean;
+}
+
+async function showSaveFilePicker(
+  options: Partial<Options> = { excludeAcceptAllOption: false }
+): Promise<FileSystemDirectoryHandle> {
+  if (native && !options._preferPolyfill) {
     return native(options);
   }
 
-  if ((options as any)._name) {
+  if (options._name) {
     console.warn("deprecated _name, spec now have `suggestedName`");
-    (options as any).suggestedName = (options as any)._name;
+    options.suggestedName = options._name;
   }
-
-  const FileSystemFileHandle = await import("./FileSystemFileHandle.js").then(
-    (d) => d.default
-  );
-  // @ts-expect-error ts-migrate(2307) FIXME: Cannot find module './adapters/downloader.js' or i... Remove this comment to see the full error message
-  const { FileHandle } = await import("./adapters/downloader.js");
-  return new FileSystemFileHandle(
-    new FileHandle((options as any).suggestedName)
-  );
+  // @ts-expect-error
+  return new FileSystemFileHandle(new FileHandle(options.suggestedName));
 }
 
 export default showSaveFilePicker;
