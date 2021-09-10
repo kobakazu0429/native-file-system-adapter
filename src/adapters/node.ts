@@ -75,7 +75,7 @@ export class Sink {
 export class FileHandle {
   constructor(private path: string, private name: string) {}
 
-  public static kind: "file";
+  public kind = "file";
 
   async getFile() {
     await fs.stat(this.path).catch((err) => {
@@ -106,7 +106,7 @@ export class FileHandle {
 export class FolderHandle {
   constructor(private path: string, private name = "") {}
 
-  public static kind: "directory";
+  public kind = "directory";
 
   isSameEntry(other: any) {
     return this.path === other.path;

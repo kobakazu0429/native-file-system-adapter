@@ -43,9 +43,7 @@ class BlobDataItem {
     private start: number,
     public size: number,
     public lastModified: number
-  ) {
-    console.log("called");
-  }
+  ) {}
 
   /**
    * Slicing arguments is first validated and formatted

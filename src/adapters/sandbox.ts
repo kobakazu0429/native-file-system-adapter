@@ -72,15 +72,14 @@ class Sink {
 export class FileHandle {
   constructor(file: FileEntry, writable = true) {
     this.file = file;
-    this.kind = "file";
     this.writable = writable;
     this.readable = true;
   }
 
   file: FileEntry;
-  kind: "file";
   writable: boolean;
   readable: boolean;
+  public kind = "file";
 
   get name() {
     return this.file.name;
@@ -116,15 +115,14 @@ export class FolderHandle {
     this.dir = dir;
     this.writable = writable;
     this.readable = true;
-    this.kind = "directory";
     this.name = dir.name;
   }
 
   dir: DirectoryEntry;
   writable: boolean;
   readable: boolean;
-  kind: "directory";
   name: string;
+  public kind = "directory";
 
   isSameEntry(other: FolderHandle) {
     return this.dir.fullPath === other.dir.fullPath;

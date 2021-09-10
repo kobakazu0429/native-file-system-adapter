@@ -13,12 +13,8 @@ const isSafari = false;
 // const WritableStream = Writable;
 
 export class FileHandle {
-  constructor(name = "unkown") {
-    this.name = name;
-    this.kind = "file";
-  }
-  name: string;
-  kind: "file";
+  constructor(public name = "unkown") {}
+  public kind = "directory";
 
   getFile() {
     throw new Error(errors.GONE);

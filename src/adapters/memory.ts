@@ -98,7 +98,6 @@ export class FileHandle {
   constructor(name = "", file = new File([], name), writable = true) {
     this.file = file;
     this.name = name;
-    this.kind = "file";
     this.deleted = false;
     this.writable = writable;
     this.readable = true;
@@ -106,10 +105,10 @@ export class FileHandle {
 
   deleted: boolean;
   file: File;
-  kind: string;
   name: string;
   readable: boolean;
   writable: boolean;
+  public kind = "file";
 
   getFile() {
     if (this.deleted) throw new Error(errors.GONE);
@@ -136,7 +135,6 @@ export class FileHandle {
 export class FolderHandle {
   constructor(name: string, writable = true) {
     this.name = name;
-    this.kind = "directory";
     this.deleted = false;
     this._entries = {};
     this.writable = writable;
@@ -144,11 +142,11 @@ export class FolderHandle {
   }
 
   _entries: Record<string, FolderHandle | FileHandle>;
-  kind: string;
   name: string;
   deleted: boolean;
   readable: boolean;
   writable: boolean;
+  public kind = "directory";
 
   async *entries() {
     if (this.deleted) throw new Error(errors.GONE);
