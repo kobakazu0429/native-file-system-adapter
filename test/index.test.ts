@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, rmdir } from "node:fs/promises";
+import { mkdir, rm } from "node:fs/promises";
 import { File, Blob } from "web-file-polyfill";
 import { WritableStream, ReadableStream } from "web-streams-polyfill";
 import { FileSystemDirectoryHandle } from "../src/FileSystemDirectoryHandle";
@@ -18,7 +18,7 @@ import {
 
 import { getOriginPrivateDirectory } from "../src/es6";
 import memory from "../src/adapters/memory";
-// import node from "../src/adapters/node";
+import node from "../src/adapters/node";
 
 let root: FileSystemDirectoryHandle;
 
@@ -28,7 +28,7 @@ const testOnlyMemory = (name: string) => (name === "memory" ? test : test.skip);
 
 describe.each([
   { name: "memory", adapter: memory },
-  // { name: "node", adapter: node },
+  { name: "node", adapter: node },
 ])("$name", ({ name, adapter }) => {
   beforeAll(async () => {
     if (name === "node") {
@@ -49,10 +49,7 @@ describe.each([
     if (name === "memory") {
       root = await getOriginPrivateDirectory(adapter);
     } else if (name === "node") {
-      root = await getOriginPrivateDirectory(
-        adapter,
-        "/Users/kazu/ghq/github.com/kobakazu0429/native-file-system-adapter-lite/testfolder"
-      );
+      root = await getOriginPrivateDirectory(adapter, testFolderPath);
     }
   });
 
@@ -62,7 +59,7 @@ describe.each([
 
   afterAll(async () => {
     if (name === "node") {
-      await rmdir(testFolderPath);
+      await rm(testFolderPath, { force: true, recursive: true });
     }
   });
 

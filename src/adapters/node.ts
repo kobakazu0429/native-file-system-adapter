@@ -4,8 +4,8 @@ import { errors } from "../util";
 import { fileFrom } from "../fetch-blob/form";
 
 export class Sink {
-  constructor(private fileHandle: any, private size: number) {}
-  private position = 0;
+  constructor(public fileHandle: any, public size: number) {}
+  public position = 0;
 
   async abort() {
     await this.fileHandle.close();
@@ -73,7 +73,7 @@ export class Sink {
 }
 
 export class FileHandle {
-  constructor(private path: string, private name: string) {}
+  constructor(public path: string, public name: string) {}
 
   public kind = "file";
 
@@ -82,7 +82,7 @@ export class FileHandle {
       if (err.code === "ENOENT") throw new Error(errors.GONE);
       throw err;
     });
-    return fileFrom(this.path);
+    return await fileFrom(this.path);
   }
 
   isSameEntry(other: any) {
@@ -104,7 +104,7 @@ export class FileHandle {
 }
 
 export class FolderHandle {
-  constructor(private path: string, private name = "") {}
+  constructor(public path: string, public name = "") {}
 
   public kind = "directory";
 
@@ -146,15 +146,16 @@ export class FolderHandle {
     return new FolderHandle(path, name);
   }
 
-  async getFileHandle(name: string, opts = {}) {
+  async getFileHandle(name: string, opts: { create?: boolean } = {}) {
     const path = join(this.path, name);
     const stat = await fs.lstat(path).catch((err) => {
       if (err.code !== "ENOENT") throw err;
     });
-    const isFile = (stat as any)?.isFile();
-    if (stat && isFile) return new FileHandle(path, name);
-    if (stat && !isFile) throw new Error(errors.MISMATCH);
-    if (!(opts as any).create) throw new Error(errors.GONE);
+    if (stat) {
+      if (stat.isFile()) return new FileHandle(path, name);
+      else throw new Error(errors.MISMATCH);
+    }
+    if (!opts.create) throw new Error(errors.GONE);
     await (await fs.open(path, "w")).close();
     return new FileHandle(path, name);
   }

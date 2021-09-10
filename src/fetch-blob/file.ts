@@ -1,0 +1,30 @@
+import Blob from "./index";
+
+export class File extends Blob {
+  constructor(
+    fileBits: any[],
+    fileName: string,
+    options: { lastModified?: number; type?: string } = {}
+  ) {
+    super(fileBits, options);
+
+    if (arguments.length < 2) {
+      throw new TypeError(
+        `Failed to construct 'File': 2 arguments required, but only ${arguments.length} present.`
+      );
+    }
+
+    if (options === null) options = {};
+
+    const modified = Number(options.lastModified);
+    this.lastModified = Number.isNaN(modified) ? Date.now() : modified;
+    this.name = String(fileName);
+  }
+
+  public lastModified = 0;
+  public name = "";
+
+  get [Symbol.toStringTag]() {
+    return "File";
+  }
+}

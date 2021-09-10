@@ -4,7 +4,7 @@ import { createReadStream } from "fs";
 import { basename } from "path";
 
 import Blob from "./index";
-// import { File, Blob } from "web-file-polyfill";
+import { File } from "./file";
 
 export const blobFrom = async (path: string, type: string) => {
   const s = await stat(path);
@@ -24,7 +24,6 @@ const fromBlob = (stat: Stats, path: string, type = "") => {
 
 const fromFile = (stat: Stats, path: string, type = "") => {
   return new File(
-    // @ts-ignore
     [new BlobDataItem(path, 0, stat.size, stat.mtimeMs)],
     basename(path),
     { type, lastModified: stat.mtimeMs }
