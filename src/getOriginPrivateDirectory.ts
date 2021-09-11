@@ -1,6 +1,6 @@
 import { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
 
-async function getOriginPrivateDirectory(
+export async function getOriginPrivateDirectory(
   driver: any,
   options = {}
 ): Promise<FileSystemDirectoryHandle> {
@@ -12,5 +12,3 @@ async function getOriginPrivateDirectory(
   }
   return new FileSystemDirectoryHandle(driver(options));
 }
-
-export default getOriginPrivateDirectory;

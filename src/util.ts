@@ -1,4 +1,3 @@
-import { WritableStream } from "web-streams-polyfill";
 import {
   FolderHandle as MemoryFolderHandle,
   FileHandle as MemoryFileHandle,
@@ -8,7 +7,7 @@ import {
   FileHandle as SandboxFileHandle,
 } from "./adapters/sandbox";
 import { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
-import FileSystemFileHandle from "./FileSystemFileHandle";
+import { FileSystemFileHandle } from "./FileSystemFileHandle";
 
 export const errors = {
   INVALID: "[InvalidStateError] seeking position failed.",

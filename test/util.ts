@@ -1,7 +1,4 @@
-import type {
-  FileSystemDirectoryHandle,
-  FileSystemFileHandle,
-} from "../src/es6";
+import type { FileSystemDirectoryHandle, FileSystemFileHandle } from "../src";
 
 export function streamFromFetch(data) {
   return new ReadableStream({

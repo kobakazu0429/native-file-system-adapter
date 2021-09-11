@@ -1,6 +1,4 @@
-import { WritableStream } from "web-streams-polyfill";
-
-class FileSystemWritableFileStream extends WritableStream {
+export class FileSystemWritableFileStream extends WritableStream {
   constructor(...args: any[]) {
     super(...args);
 
@@ -11,7 +9,6 @@ class FileSystemWritableFileStream extends WritableStream {
 
   private _closed = false;
 
-  // @ts-expect-error
   close() {
     this._closed = true;
     const w = this.getWriter();
@@ -60,6 +57,3 @@ Object.defineProperties(FileSystemWritableFileStream.prototype, {
   truncate: { enumerable: true },
   write: { enumerable: true },
 });
-
-export default FileSystemWritableFileStream;
-export { FileSystemWritableFileStream };

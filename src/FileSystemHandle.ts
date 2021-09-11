@@ -1,6 +1,6 @@
 const kAdapter = Symbol("adapter");
 
-class FileSystemHandle {
+export class FileSystemHandle {
   constructor(adapter: FileSystemHandle & { writable: boolean }) {
     this.kind = adapter.kind;
     this.name = adapter.name;
@@ -55,6 +55,3 @@ Object.defineProperty(FileSystemHandle.prototype, Symbol.toStringTag, {
   enumerable: false,
   configurable: true,
 });
-
-export default FileSystemHandle;
-export { FileSystemHandle };

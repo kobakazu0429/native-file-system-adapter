@@ -2,7 +2,6 @@ import { existsSync } from "node:fs";
 import { mkdir, rm } from "node:fs/promises";
 import { File, Blob } from "web-file-polyfill";
 import { WritableStream, ReadableStream } from "web-streams-polyfill";
-import { FileSystemDirectoryHandle } from "../src/FileSystemDirectoryHandle";
 import {
   streamFromFetch,
   getFileSize,
@@ -16,19 +15,20 @@ import {
   cleanupSandboxedFileSystem,
 } from "./util";
 
-import { getOriginPrivateDirectory } from "../src/es6";
-import memory from "../src/adapters/memory";
-import node from "../src/adapters/node";
+import {
+  getOriginPrivateDirectory,
+  FileSystemDirectoryHandle,
+  memoryAdapter,
+  nodeAdapter,
+} from "../src";
 
 let root: FileSystemDirectoryHandle;
-
 const testFolderPath = "./testfolder";
-
 const testOnlyMemory = (name: string) => (name === "memory" ? test : test.skip);
 
 describe.each([
-  { name: "memory", adapter: memory },
-  { name: "node", adapter: node },
+  { name: "memory", adapter: memoryAdapter },
+  { name: "node", adapter: nodeAdapter },
 ])("$name", ({ name, adapter }) => {
   beforeAll(async () => {
     if (name === "node") {

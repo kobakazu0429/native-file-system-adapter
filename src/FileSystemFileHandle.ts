@@ -1,9 +1,9 @@
-import FileSystemHandle from "./FileSystemHandle";
-import FileSystemWritableFileStream from "./FileSystemWritableFileStream";
+import { FileSystemHandle } from "./FileSystemHandle";
+import { FileSystemWritableFileStream } from "./FileSystemWritableFileStream";
 
 const kAdapter = Symbol("adapter");
 
-class FileSystemFileHandle extends FileSystemHandle {
+export class FileSystemFileHandle extends FileSystemHandle {
   constructor(adapter: any) {
     super(adapter);
     this[kAdapter] = adapter;
@@ -35,6 +35,3 @@ Object.defineProperties(FileSystemFileHandle.prototype, {
   createWritable: { enumerable: true },
   getFile: { enumerable: true },
 });
-
-export default FileSystemFileHandle;
-export { FileSystemFileHandle };

@@ -1,16 +1,12 @@
-import { TransformStream, WritableStream } from "web-streams-polyfill";
 import { errors } from "../util";
 
-const isSafari = false;
-// // @ts-ignore
-// /constructor/i.test(window.HTMLElement) ||
-// // @ts-ignore
-// window.safari ||
-// // @ts-ignore
-// window.WebKitPoint;
-
-// const TransformStream = Transform;
-// const WritableStream = Writable;
+const isSafari =
+  process.env.CI || process.env.NODE_ENV === "test"
+    ? false
+    : // @ts-ignore
+      window.safari ||
+      // @ts-ignore
+      window.WebKitPoint;
 
 export class FileHandle {
   constructor(public name = "unkown") {}

@@ -1,4 +1,4 @@
-import FileSystemFileHandle from "./FileSystemFileHandle";
+import { FileSystemFileHandle } from "./FileSystemFileHandle";
 import type { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
 import { FileHandle } from "./adapters/downloader";
 
@@ -22,7 +22,7 @@ interface Options {
   _preferPolyfill: boolean;
 }
 
-async function showSaveFilePicker(
+export async function showSaveFilePicker(
   options: Partial<Options> = { excludeAcceptAllOption: false }
 ): Promise<FileSystemDirectoryHandle> {
   if (native && !options._preferPolyfill) {
@@ -36,6 +36,3 @@ async function showSaveFilePicker(
   // @ts-expect-error
   return new FileSystemFileHandle(new FileHandle(options.suggestedName));
 }
-
-export default showSaveFilePicker;
-export { showSaveFilePicker };

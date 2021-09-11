@@ -1,6 +1,6 @@
 import { fromInput } from "./util";
 import type { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
-import type FileSystemFileHandle from "./FileSystemFileHandle";
+import type { FileSystemFileHandle } from "./FileSystemFileHandle";
 
 const def = {
   accepts: [],

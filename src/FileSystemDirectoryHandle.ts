@@ -1,5 +1,5 @@
-import FileSystemHandle from "./FileSystemHandle";
-import FileSystemFileHandle from "./FileSystemFileHandle";
+import { FileSystemHandle } from "./FileSystemHandle";
+import { FileSystemFileHandle } from "./FileSystemFileHandle";
 
 const kAdapter = Symbol("adapter");
 
