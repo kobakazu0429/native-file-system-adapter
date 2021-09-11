@@ -1,4 +1,4 @@
-import { errors } from "../util";
+import { errors } from "../errors";
 
 const isSafari =
   process.env.CI || process.env.NODE_ENV === "test"

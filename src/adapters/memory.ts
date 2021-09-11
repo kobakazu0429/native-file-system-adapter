@@ -1,4 +1,4 @@
-import { errors } from "../util";
+import { errors } from "../errors";
 
 export class Sink {
   constructor(fileHandle: FileHandle) {

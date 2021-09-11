@@ -1,5 +1,5 @@
 import { createReadStream } from "fs";
-import { stat } from "fs/promises";
+import { promises as fs } from "fs";
 import type { Stats } from "fs";
 import { basename } from "path";
 
@@ -7,12 +7,12 @@ import { MyBlob } from "./blob";
 import { MyFile } from "./file";
 
 export const blobFrom = async (path: string, type: string) => {
-  const s = await stat(path);
+  const s = await fs.stat(path);
   return fromBlob(s, path, type);
 };
 
 export const fileFrom = async (path: string, type?: string) => {
-  const s = await stat(path);
+  const s = await fs.stat(path);
   return fromFile(s, path, type);
 };
 
@@ -53,7 +53,7 @@ class BlobDataItem {
   }
 
   async *stream() {
-    const { mtimeMs } = await stat(this.path);
+    const { mtimeMs } = await fs.stat(this.path);
     if (mtimeMs > this.lastModified) {
       throw new Error(
         "[NotReadableError] The requested file could not be read, typically due to permission problems that have occurred after a reference to a file was acquired."

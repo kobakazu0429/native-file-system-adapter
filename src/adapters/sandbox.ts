@@ -1,4 +1,4 @@
-import { errors } from "../util";
+import { errors } from "../errors";
 
 class Sink {
   constructor(writer: FileWriter, fileEntry: FileEntry) {
@@ -190,6 +190,7 @@ export default (opts: any = {}) =>
     window.webkitRequestFileSystem(
       opts._persistent,
       0,
+      // @ts-ignore
       (e) => resolve(new FolderHandle(e.root)),
       reject
     )

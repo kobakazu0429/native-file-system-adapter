@@ -1,6 +1,6 @@
-import fs from "node:fs/promises";
+import { promises as fs } from "fs";
 import { join } from "path";
-import { errors } from "../util";
+import { errors } from "../errors";
 import { fileFrom } from "../fetch-blob/form";
 
 export class Sink {
