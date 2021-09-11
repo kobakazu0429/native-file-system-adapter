@@ -18,8 +18,8 @@ import {
 import {
   getOriginPrivateDirectory,
   FileSystemDirectoryHandle,
-  memoryAdapter,
-  nodeAdapter,
+  memory,
+  node,
 } from "../src";
 
 let root: FileSystemDirectoryHandle;
@@ -27,8 +27,8 @@ const testFolderPath = "./testfolder";
 const testOnlyMemory = (name: string) => (name === "memory" ? test : test.skip);
 
 describe.each([
-  { name: "memory", adapter: memoryAdapter },
-  { name: "node", adapter: nodeAdapter },
+  { name: "memory", adapter: memory },
+  { name: "node", adapter: node },
 ])("$name", ({ name, adapter }) => {
   beforeAll(async () => {
     if (name === "node") {
