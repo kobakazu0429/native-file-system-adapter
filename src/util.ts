@@ -29,7 +29,7 @@ export async function fromDataTransfer(entries: any) {
 }
 
 export async function fromInput(input: HTMLInputElement) {
-  const files = Array.from(input.files);
+  const files = Array.from(input.files!);
   if (input.webkitdirectory) {
     const rootName = files[0].webkitRelativePath.split("/", 1)[0];
     const root = new MemoryFolderHandle(rootName, false);
@@ -42,18 +42,18 @@ export async function fromInput(input: HTMLInputElement) {
           dir._entries[path] = new MemoryFolderHandle(path, false);
         return dir._entries[path];
       }, root);
-      dir._entries[name] = new MemoryFileHandle(file.name, file, false);
+      dir._entries[name!] = new MemoryFileHandle(file.name, file, false);
     });
     return new FileSystemDirectoryHandle(root);
   } else {
-    const files = Array.from(input.files).map(
+    const fileHandles = files.map(
       (file) =>
         new FileSystemFileHandle(new MemoryFileHandle(file.name, file, false))
     );
     if (input.multiple) {
-      return files;
+      return fileHandles;
     } else {
-      return files[0];
+      return fileHandles[0];
     }
   }
 }

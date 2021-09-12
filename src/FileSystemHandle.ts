@@ -14,8 +14,9 @@ export class FileSystemHandle {
 
   async queryPermission(
     options: { readable?: boolean; writable?: boolean } = {}
-  ) {
+  ): Promise<string> {
     if (options.readable) return "granted";
+    // @ts-ignore
     return this[kAdapter].queryPermission
       ? await this[kAdapter].queryPermission(options)
       : this[kAdapter].writable

@@ -41,7 +41,7 @@ export class MyBlob {
     this.#parts = parts;
   }
 
-  static [Symbol.hasInstance](object) {
+  static [Symbol.hasInstance](object: any) {
     return (
       object &&
       typeof object === "object" &&

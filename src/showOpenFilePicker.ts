@@ -6,8 +6,6 @@ const def = {
   accepts: [],
 };
 
-const native = globalThis.showOpenFilePicker;
-
 interface Options {
   multiple: boolean;
   excludeAcceptAllOption: boolean;
@@ -21,7 +19,8 @@ export async function showOpenFilePicker(
   FileSystemDirectoryHandle | FileSystemFileHandle | FileSystemFileHandle[]
 > {
   const opts = { ...def, ...options };
-
+  // @ts-ignore
+  const native = globalThis.showOpenFilePicker;
   if (native && !options._preferPolyfill) {
     return native(opts);
   }

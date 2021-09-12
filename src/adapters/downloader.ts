@@ -25,7 +25,7 @@ export class FileHandle {
     link.download = this.name;
 
     if (isSafari || !sw) {
-      let chunks = [];
+      let chunks: BlobPart[] = [];
       ts.readable.pipeTo(
         new WritableStream({
           write(chunk) {
@@ -54,17 +54,17 @@ export class FileHandle {
         ...(options.size ? { "content-length": options.size } : {}),
       };
 
-      const keepAlive = setTimeout(() => sw.active.postMessage(0), 10000);
+      const keepAlive = setTimeout(() => sw.active?.postMessage(0), 10000);
 
       ts.readable
         .pipeThrough(
           new TransformStream({
             transform(chunk, ctrl) {
               if (chunk instanceof Uint8Array) return ctrl.enqueue(chunk);
-              const reader = new Response(chunk).body.getReader();
-              const pump = (_?: any) =>
+              const reader = new Response(chunk).body?.getReader();
+              const pump = (_?: any): any =>
                 reader
-                  .read()
+                  ?.read()
                   .then((e) => (e.done ? 0 : pump(ctrl.enqueue(e.value))));
               return pump();
             },
@@ -76,7 +76,7 @@ export class FileHandle {
         });
 
       // Transfer the stream to service worker
-      sw.active.postMessage(
+      sw.active?.postMessage(
         {
           url: sw.scope + fileName,
           headers,
@@ -102,25 +102,25 @@ const ERROR = 1;
 const ABORT = 1;
 const CLOSE = 2;
 
-class MessagePortSink {
+class MessagePortSink implements UnderlyingSink {
   constructor(private port: MessagePort) {
     this._resetReady();
     this.port.onmessage = (event) => this._onMessage(event.data);
   }
 
-  private _controller: any;
-  private _readyPromise: Promise<any>;
+  private _controller!: WritableStreamDefaultController;
+  private _readyPromise!: Promise<any>;
   private _readyReject: any;
   private _readyResolve: any;
-  private _readyPending: boolean;
+  private _readyPending!: boolean;
 
-  start(controller) {
+  start(controller: WritableStreamDefaultController) {
     this._controller = controller;
     // Apply initial backpressure
     return this._readyPromise;
   }
 
-  write(chunk) {
+  write(chunk: any) {
     const message = { type: WRITE, chunk };
 
     // Send chunk
@@ -138,17 +138,17 @@ class MessagePortSink {
     this.port.close();
   }
 
-  abort(reason) {
+  abort(reason: any) {
     this.port.postMessage({ type: ABORT, reason });
     this.port.close();
   }
 
-  _onMessage(message) {
+  _onMessage(message: any) {
     if (message.type === PULL) this._resolveReady();
     if (message.type === ERROR) this._onError(message.reason);
   }
 
-  _onError(reason) {
+  _onError(reason: any) {
     this._controller.error(reason);
     this._rejectReady(reason);
     this.port.close();
@@ -167,7 +167,7 @@ class MessagePortSink {
     this._readyPending = false;
   }
 
-  _rejectReady(reason) {
+  _rejectReady(reason: any) {
     if (!this._readyPending) this._resetReady();
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     this._readyPromise.catch(() => {});

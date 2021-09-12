@@ -883,7 +883,7 @@ describe.each([
     );
   });
 
-  test.skip("write() fails when parent directory is removed", async (_root) => {
+  test.skip("write() fails when parent directory is removed", async () => {
     // TODO: fix me
     // const dir = await createDirectory("parent_dir", root);
     // const handle = await createEmptyFile(
@@ -896,7 +896,7 @@ describe.each([
     // expect(err.message).toBe("write() fails when parent directory is removed");
   });
 
-  test.skip("truncate() fails when parent directory is removed", async (_root) => {
+  test.skip("truncate() fails when parent directory is removed", async () => {
     // TODO: fix me
     // const dir = await createDirectory('parent_dir', root)
     // file_name = 'truncate_fails_when_dir_removed.txt'
@@ -923,7 +923,7 @@ describe.each([
     }
   );
 
-  test.skip("createWritable({keepExistingData: false}): atomic writable file stream initialized with empty file", async (_root) => {
+  test.skip("createWritable({keepExistingData: false}): atomic writable file stream initialized with empty file", async () => {
     // TODO: fix me
     // handle = await createFileWithContents('atomic_file_is_not_copied.txt', 'very long string', root)
     // wfs = await handle.createWritable({ keepExistingData: false })

@@ -2,8 +2,6 @@ import { FileSystemFileHandle } from "./FileSystemFileHandle";
 import type { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
 import { FileHandle } from "./adapters/downloader";
 
-const native = globalThis.showSaveFilePicker;
-
 /**
  * @param {Object} [options]
  * @param {boolean} [options.excludeAcceptAllOption=false] Prevent user for selecting any
@@ -25,6 +23,8 @@ interface Options {
 export async function showSaveFilePicker(
   options: Partial<Options> = { excludeAcceptAllOption: false }
 ): Promise<FileSystemDirectoryHandle> {
+  // @ts-ignore
+  const native = globalThis.showSaveFilePicker;
   if (native && !options._preferPolyfill) {
     return native(options);
   }

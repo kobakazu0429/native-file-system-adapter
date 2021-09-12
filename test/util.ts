@@ -1,7 +1,7 @@
 import type { FileSystemDirectoryHandle, FileSystemFileHandle } from "../src";
 
-export function streamFromFetch(data) {
-  return new ReadableStream({
+export function streamFromFetch(data: string) {
+  return new ReadableStream<string>({
     start(ctrl) {
       ctrl.enqueue(data);
       ctrl.close();

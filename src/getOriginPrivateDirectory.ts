@@ -7,6 +7,7 @@ export async function getOriginPrivateDirectory(
   if (!driver) {
     return (
       (window.navigator.storage as any).getDirectory() ||
+      // @ts-ignore
       globalThis.getOriginPrivateDirectory()
     );
   }

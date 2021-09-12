@@ -1,11 +1,11 @@
 import type { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
 import { fromInput } from "./util";
 
-const native = globalThis.showDirectoryPicker;
-
 export async function showDirectoryPicker(
   options: { _preferPolyfill?: boolean } = {}
 ): Promise<FileSystemDirectoryHandle> {
+  // @ts-ignore
+  const native = globalThis.showDirectoryPicker as any;
   if (native && !options._preferPolyfill) {
     return native(options);
   }
