@@ -1,13 +1,5 @@
 import { NotFoundError } from "../errors";
 
-const isSafari =
-  process.env.CI || process.env.NODE_ENV === "test"
-    ? false
-    : // @ts-ignore
-      window.safari ||
-      // @ts-ignore
-      window.WebKitPoint;
-
 export class FileHandle {
   constructor(public name = "unkown") {}
   public kind = "directory";
@@ -23,6 +15,14 @@ export class FileHandle {
     const sink = ts.writable;
 
     link.download = this.name;
+
+    const isSafari =
+      process.env.CI || process.env.NODE_ENV === "test"
+        ? false
+        : // @ts-ignore
+          window.safari ||
+          // @ts-ignore
+          window.WebKitPoint;
 
     if (isSafari || !sw) {
       let chunks: BlobPart[] = [];
