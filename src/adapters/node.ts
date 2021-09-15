@@ -1,6 +1,12 @@
 import { promises as fs } from "fs";
 import { join } from "path";
-import { errors } from "../errors";
+import {
+  InvalidModificationError,
+  InvalidStateError,
+  NotFoundError,
+  SyntaxError,
+  TypeMismatchError,
+} from "../errors";
 import { fileFrom } from "../fetch-blob/form";
 
 export class Sink {
@@ -19,19 +25,19 @@ export class Sink {
         }
         if (!("data" in chunk)) {
           await this.fileHandle.close();
-          throw new Error(errors.SYNTAX("write requires a data argument"));
+          throw new SyntaxError("write requires a data argument");
         }
         chunk = chunk.data;
       } else if (chunk.type === "seek") {
         if (Number.isInteger(chunk.position) && chunk.position >= 0) {
           if (this.size < chunk.position) {
-            throw new Error(errors.INVALID);
+            throw new InvalidStateError();
           }
           this.position = chunk.position;
           return;
         } else {
           await this.fileHandle.close();
-          throw new Error(errors.SYNTAX("seek requires a position argument"));
+          throw new SyntaxError("seek requires a position argument");
         }
       } else if (chunk.type === "truncate") {
         if (Number.isInteger(chunk.size) && chunk.size >= 0) {
@@ -43,7 +49,7 @@ export class Sink {
           return;
         } else {
           await this.fileHandle.close();
-          throw new Error(errors.SYNTAX("truncate requires a size argument"));
+          throw new SyntaxError("truncate requires a size argument");
         }
       }
     }
@@ -79,7 +85,7 @@ export class FileHandle {
 
   async getFile() {
     await fs.stat(this.path).catch((err) => {
-      if (err.code === "ENOENT") throw new Error(errors.GONE);
+      if (err.code === "ENOENT") throw new NotFoundError();
       throw err;
     });
     return await fileFrom(this.path);
@@ -91,7 +97,7 @@ export class FileHandle {
 
   async createWritable() {
     const fileHandle = await fs.open(this.path, "r+").catch((err) => {
-      if (err.code === "ENOENT") throw new Error(errors.GONE);
+      if (err.code === "ENOENT") throw new NotFoundError();
       throw err;
     });
     const { size } = await fileHandle.stat();
@@ -119,7 +125,7 @@ export class FolderHandle {
   > {
     const dir = this.path;
     const items = await fs.readdir(dir).catch((err) => {
-      if (err.code === "ENOENT") throw new Error(errors.GONE);
+      if (err.code === "ENOENT") throw new NotFoundError();
       throw err;
     });
     for (const name of items) {
@@ -133,15 +139,19 @@ export class FolderHandle {
     }
   }
 
-  async getDirectoryHandle(name: string, opts = {}) {
+  async getDirectoryHandle(
+    name: string,
+    options: { create?: boolean; capture?: boolean } = {}
+  ) {
     const path = join(this.path, name);
     const stat = await fs.lstat(path).catch((err) => {
       if (err.code !== "ENOENT") throw err;
     });
-    const isDirectory = (stat as any)?.isDirectory();
+    const isDirectory = stat?.isDirectory();
+    console.log("isDirectory", isDirectory);
     if (stat && isDirectory) return new FolderHandle(path, name);
-    if (stat && !isDirectory) throw new Error(errors.MISMATCH);
-    if (!(opts as any).create) throw new Error(errors.GONE);
+    if (stat && !isDirectory) throw new TypeMismatchError();
+    if (!options.create) throw new NotFoundError();
     await fs.mkdir(path);
     return new FolderHandle(path, name);
   }
@@ -153,9 +163,9 @@ export class FolderHandle {
     });
     if (stat) {
       if (stat.isFile()) return new FileHandle(path, name);
-      else throw new Error(errors.MISMATCH);
+      else throw new TypeMismatchError();
     }
-    if (!opts.create) throw new Error(errors.GONE);
+    if (!opts.create) throw new NotFoundError();
     await (await fs.open(path, "w")).close();
     return new FileHandle(path, name);
   }
@@ -167,18 +177,18 @@ export class FolderHandle {
   async removeEntry(name: string, opts: { recursive?: boolean }) {
     const path = join(this.path, name);
     const stat = await fs.lstat(path).catch((err) => {
-      if (err.code === "ENOENT") throw new Error(errors.GONE);
+      if (err.code === "ENOENT") throw new NotFoundError();
       throw err;
     });
     if (stat.isDirectory()) {
       if (opts.recursive) {
         await fs.rm(path, { recursive: true }).catch((err) => {
-          if (err.code === "ENOTEMPTY") throw new Error(errors.MOD_ERR);
+          if (err.code === "ENOTEMPTY") throw new InvalidModificationError();
           throw err;
         });
       } else {
         await fs.rmdir(path).catch((err) => {
-          if (err.code === "ENOTEMPTY") throw new Error(errors.MOD_ERR);
+          if (err.code === "ENOTEMPTY") throw new InvalidModificationError();
           throw err;
         });
       }

@@ -1,4 +1,11 @@
-import { errors } from "../errors";
+import {
+  InvalidModificationError,
+  InvalidStateError,
+  NotAllowedError,
+  NotFoundError,
+  SyntaxError,
+  TypeMismatchError,
+} from "../errors";
 
 export class Sink {
   constructor(fileHandle: FileHandle) {
@@ -29,18 +36,18 @@ export class Sink {
           }
         }
         if (!("data" in chunk)) {
-          throw new Error(errors.SYNTAX("write requires a data argument"));
+          throw new SyntaxError("write requires a data argument");
         }
         chunk = chunk.data;
       } else if (chunk.type === "seek") {
         if (Number.isInteger(chunk.position) && chunk.position >= 0) {
           if (this.size < chunk.position) {
-            throw new Error(errors.INVALID);
+            throw new InvalidStateError();
           }
           this.position = chunk.position;
           return;
         } else {
-          throw new Error(errors.SYNTAX("seek requires a position argument"));
+          throw new SyntaxError("seek requires a position argument");
         }
       } else if (chunk.type === "truncate") {
         if (Number.isInteger(chunk.size) && chunk.size >= 0) {
@@ -59,7 +66,7 @@ export class Sink {
           this.file = file;
           return;
         } else {
-          throw new Error(errors.SYNTAX("truncate requires a size argument"));
+          throw new SyntaxError("truncate requires a size argument");
         }
       }
     }
@@ -84,7 +91,7 @@ export class Sink {
     this.file = blob;
   }
   close() {
-    if (this.fileHandle.deleted) throw new Error(errors.GONE);
+    if (this.fileHandle.deleted) throw new NotFoundError();
     this.fileHandle.file = this.file;
     // @ts-ignore
     this.file = this.position = this.size = null;
@@ -111,13 +118,13 @@ export class FileHandle {
   public kind = "file";
 
   getFile() {
-    if (this.deleted) throw new Error(errors.GONE);
+    if (this.deleted) throw new NotFoundError();
     return this.file;
   }
 
   createWritable(_opts: any) {
-    if (!this.writable) throw new Error(errors.DISALLOWED);
-    if (this.deleted) throw new Error(errors.GONE);
+    if (!this.writable) throw new NotAllowedError();
+    if (this.deleted) throw new NotFoundError();
     return new Sink(this);
   }
 
@@ -149,7 +156,7 @@ export class FolderHandle {
   public kind = "directory";
 
   async *entries() {
-    if (this.deleted) throw new Error(errors.GONE);
+    if (this.deleted) throw new NotFoundError();
     yield* Object.entries(this._entries);
   }
 
@@ -158,12 +165,12 @@ export class FolderHandle {
   }
 
   getDirectoryHandle(name: string, opts = {}) {
-    if (this.deleted) throw new Error(errors.GONE);
+    if (this.deleted) throw new NotFoundError();
     const entry = this._entries[name];
     if (entry) {
       // entry exist
       if (entry instanceof FileHandle) {
-        throw new Error(errors.MISMATCH);
+        throw new TypeMismatchError();
       } else {
         return entry;
       }
@@ -171,7 +178,7 @@ export class FolderHandle {
       if ((opts as any).create) {
         return (this._entries[name] = new FolderHandle(name));
       } else {
-        throw new Error(errors.GONE);
+        throw new NotFoundError();
       }
     }
   }
@@ -180,8 +187,8 @@ export class FolderHandle {
     const entry = this._entries[name];
     const isFile = entry instanceof FileHandle;
     if (entry && isFile) return entry;
-    if (entry && !isFile) throw new Error(errors.MISMATCH);
-    if (!entry && !(opts as any).create) throw new Error(errors.GONE);
+    if (entry && !isFile) throw new TypeMismatchError();
+    if (!entry && !(opts as any).create) throw new NotFoundError();
     if (!entry && (opts as any).create) {
       return (this._entries[name] = new FileHandle(name));
     }
@@ -189,14 +196,14 @@ export class FolderHandle {
 
   removeEntry(name: string, opts: any) {
     const entry = this._entries[name];
-    if (!entry) throw new Error(errors.GONE);
+    if (!entry) throw new NotFoundError();
     entry.destroy(opts.recursive);
     delete this._entries[name];
   }
 
   destroy(recursive: boolean) {
     for (const x of Object.values(this._entries)) {
-      if (!recursive) throw new Error(errors.MOD_ERR);
+      if (!recursive) throw new InvalidModificationError();
       (x as any).destroy(recursive);
     }
     this._entries = {};

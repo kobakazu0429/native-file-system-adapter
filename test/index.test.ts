@@ -68,8 +68,9 @@ describe.each([
       const err = await capture(root.getDirectoryHandle("non-existing-dir"));
       expect(err).toBeInstanceOf(Error);
       expect(err.message).toBe(
-        "[NotFoundError] A requested file or directory could not be found at the time an operation was processed."
+        "A requested file or directory could not be found at the time an operation was processed."
       );
+      expect(err.name).toBe("NotFoundError");
     });
 
     test("getDirectoryHandle(create=true) creates an empty directory", async () => {
@@ -123,14 +124,16 @@ describe.each([
     test("getDirectoryHandle() when a file already exists with the same name", async () => {
       await createEmptyFile("file-name", root);
       let err = await capture(root.getDirectoryHandle("file-name"));
+      expect(err.name).toBe("TypeMismatchError");
       expect(err.message).toBe(
-        "[TypeMismatchError] The path supplied exists, but was not an entry of requested type."
+        "The path supplied exists, but was not an entry of requested type."
       );
       err = await capture(
         root.getDirectoryHandle("file-name", { create: false })
       );
+      expect(err.name).toBe("TypeMismatchError");
       expect(err.message).toBe(
-        "[TypeMismatchError] The path supplied exists, but was not an entry of requested type."
+        "The path supplied exists, but was not an entry of requested type."
       );
       err = await capture(
         root.getDirectoryHandle("file-name", { create: true })
@@ -184,8 +187,9 @@ describe.each([
     test("getFileHandle(create=false) rejects for non-existing files", async () => {
       const err = await capture(root.getFileHandle("non-existing-file"));
       expect(err.message).toBe(
-        "[NotFoundError] A requested file or directory could not be found at the time an operation was processed."
+        "A requested file or directory could not be found at the time an operation was processed."
       );
+      expect(err.name).toBe("NotFoundError");
     });
 
     test("getFileHandle(create=true) creates an empty file for non-existing files", async () => {
@@ -221,8 +225,9 @@ describe.each([
     test("getFileHandle(create=false) when a directory already exists with the same name", async () => {
       await root.getDirectoryHandle("dir-name", { create: true });
       const err = await capture(root.getFileHandle("dir-name"));
+      expect(err.name).toBe("TypeMismatchError");
       expect(err.message).toBe(
-        "[TypeMismatchError] The path supplied exists, but was not an entry of requested type."
+        "The path supplied exists, but was not an entry of requested type."
       );
     });
 
@@ -231,8 +236,9 @@ describe.each([
       const err = await capture(
         root.getFileHandle("dir-name", { create: true })
       );
+      expect(err.name).toBe("TypeMismatchError");
       expect(err.message).toBe(
-        "[TypeMismatchError] The path supplied exists, but was not an entry of requested type."
+        "The path supplied exists, but was not an entry of requested type."
       );
     });
 
@@ -286,8 +292,9 @@ describe.each([
       ]);
       const err = await capture(getFileContents(handle));
       expect(err.message).toBe(
-        "[NotFoundError] A requested file or directory could not be found at the time an operation was processed."
+        "A requested file or directory could not be found at the time an operation was processed."
       );
+      expect(err.name).toBe("NotFoundError");
     });
 
     test("removeEntry() on an already removed file should fail", async () => {
@@ -295,8 +302,9 @@ describe.each([
       await root.removeEntry("file-to-remove");
       const err = await capture(root.removeEntry("file-to-remove"));
       expect(err.message).toBe(
-        "[NotFoundError] A requested file or directory could not be found at the time an operation was processed."
+        "A requested file or directory could not be found at the time an operation was processed."
       );
+      expect(err.name).toBe("NotFoundError");
     });
 
     test("removeEntry() to remove an empty directory", async () => {
@@ -310,8 +318,9 @@ describe.each([
       ]);
       const err = await capture(getSortedDirectoryEntries(handle));
       expect(err.message).toBe(
-        "[NotFoundError] A requested file or directory could not be found at the time an operation was processed."
+        "A requested file or directory could not be found at the time an operation was processed."
       );
+      expect(err.name).toBe("NotFoundError");
     });
 
     test("removeEntry() on a non-empty directory should fail", async () => {
@@ -320,9 +329,8 @@ describe.each([
       });
       await createEmptyFile("file-in-dir", handle);
       const err = await capture(root.removeEntry("dir-to-remove"));
-      expect(err.message).toBe(
-        "[InvalidModificationError] The object can not be modified in this way."
-      );
+      expect(err.message).toBe("The object can not be modified in this way.");
+      expect(err.name).toBe("InvalidModificationError");
       expect(await getSortedDirectoryEntries(root)).toStrictEqual([
         "dir-to-remove/",
       ]);
@@ -680,8 +688,9 @@ describe.each([
       await root.removeEntry("parent_dir", { recursive: true });
       const err = await capture(wfs.close());
       expect(err.message).toBe(
-        "[NotFoundError] A requested file or directory could not be found at the time an operation was processed."
+        "A requested file or directory could not be found at the time an operation was processed."
       );
+      expect(err.name).toBe("NotFoundError");
     }
   );
 
@@ -823,8 +832,9 @@ describe.each([
     );
     const wfs = await handle.createWritable();
     const err = await capture(wfs.write({ type: "truncate" }));
+    expect(err.name).toBe("SyntaxError");
     expect(err.message).toBe(
-      "[SyntaxError] Failed to execute 'write' on 'UnderlyingSinkBase': Invalid params passed. truncate requires a size argument"
+      "Failed to execute 'write' on 'UnderlyingSinkBase': Invalid params passed. truncate requires a size argument"
     );
   });
 
@@ -832,8 +842,9 @@ describe.each([
     const handle = await createEmptyFile("content.txt", root);
     const wfs = await handle.createWritable();
     const err = await capture(wfs.write({ type: "write" }));
+    expect(err.name).toBe("SyntaxError");
     expect(err.message).toBe(
-      "[SyntaxError] Failed to execute 'write' on 'UnderlyingSinkBase': Invalid params passed. write requires a data argument"
+      "Failed to execute 'write' on 'UnderlyingSinkBase': Invalid params passed. write requires a data argument"
     );
   });
 
@@ -845,8 +856,9 @@ describe.each([
     );
     const wfs = await handle.createWritable();
     const err = await capture(wfs.write({ type: "seek" }));
+    expect(err.name).toBe("SyntaxError");
     expect(err.message).toBe(
-      "[SyntaxError] Failed to execute 'write' on 'UnderlyingSinkBase': Invalid params passed. seek requires a position argument"
+      "Failed to execute 'write' on 'UnderlyingSinkBase': Invalid params passed. seek requires a position argument"
     );
   });
 
@@ -879,8 +891,9 @@ describe.each([
     await root.removeEntry("parent_dir", { recursive: true });
     const err = await capture(handle.createWritable());
     expect(err.message).toBe(
-      "[NotFoundError] A requested file or directory could not be found at the time an operation was processed."
+      "A requested file or directory could not be found at the time an operation was processed."
     );
+    expect(err.name).toBe("NotFoundError");
   });
 
   test.skip("write() fails when parent directory is removed", async () => {

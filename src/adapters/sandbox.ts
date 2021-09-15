@@ -1,4 +1,4 @@
-import { errors } from "../errors";
+import { NotAllowedError } from "../errors";
 
 class Sink {
   constructor(writer: FileWriter, fileEntry: FileEntry) {
@@ -94,7 +94,7 @@ export class FileHandle {
   }
 
   createWritable(opts: any): Promise<Sink> {
-    if (!this.writable) throw new Error(errors.DISALLOWED);
+    if (!this.writable) throw new NotAllowedError();
 
     return new Promise((resolve, reject) =>
       this.file.createWriter((fileWriter) => {

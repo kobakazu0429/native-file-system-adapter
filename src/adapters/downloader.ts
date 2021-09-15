@@ -1,4 +1,4 @@
-import { errors } from "../errors";
+import { NotFoundError } from "../errors";
 
 const isSafari =
   process.env.CI || process.env.NODE_ENV === "test"
@@ -13,7 +13,7 @@ export class FileHandle {
   public kind = "directory";
 
   getFile() {
-    throw new Error(errors.GONE);
+    throw new NotFoundError();
   }
 
   async createWritable(options: any) {

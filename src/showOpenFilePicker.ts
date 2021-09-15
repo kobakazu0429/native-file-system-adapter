@@ -1,6 +1,6 @@
 import { fromInput } from "./util";
-import type { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
-import type { FileSystemFileHandle } from "./FileSystemFileHandle";
+import type { FileSystemDirectoryHandle as MyFileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
+import type { FileSystemFileHandle as MyFileSystemFileHandle } from "./FileSystemFileHandle";
 
 const def = {
   accepts: [],
@@ -16,7 +16,12 @@ interface Options {
 export async function showOpenFilePicker(
   options: Options = {} as Options
 ): Promise<
-  FileSystemDirectoryHandle | FileSystemFileHandle | FileSystemFileHandle[]
+  | FileSystemDirectoryHandle
+  | FileSystemFileHandle
+  | FileSystemFileHandle[]
+  | MyFileSystemDirectoryHandle
+  | MyFileSystemFileHandle
+  | MyFileSystemFileHandle[]
 > {
   const opts = { ...def, ...options };
   // @ts-ignore
