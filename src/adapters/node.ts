@@ -148,7 +148,6 @@ export class FolderHandle {
       if (err.code !== "ENOENT") throw err;
     });
     const isDirectory = stat?.isDirectory();
-    console.log("isDirectory", isDirectory);
     if (stat && isDirectory) return new FolderHandle(path, name);
     if (stat && !isDirectory) throw new TypeMismatchError();
     if (!options.create) throw new NotFoundError();

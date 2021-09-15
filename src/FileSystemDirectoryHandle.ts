@@ -18,7 +18,6 @@ export class FileSystemDirectoryHandle extends FileSystemHandle {
     if (name === "") throw new TypeError(`Name can't be an empty string.`);
     if (name === "." || name === ".." || name.includes("/"))
       throw new TypeError(`Name contains invalid characters.`);
-    console.debug(name, options);
 
     return new FileSystemDirectoryHandle(
       await this[kAdapter].getDirectoryHandle(name, options)
