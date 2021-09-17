@@ -10,3 +10,7 @@ export { FileHandle as downloader } from "./adapters/downloader";
 export { default as memory } from "./adapters/memory";
 export { default as node } from "./adapters/node";
 export { default as sandbox } from "./adapters/sandbox";
+export * from "./fetch-blob/file";
+export * from "./fetch-blob/blob";
+export * from "./fetch-blob/form";
+export * from "./fetch-blob/utils";
