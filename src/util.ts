@@ -7,7 +7,6 @@ import {
   FileHandle as SandboxFileHandle,
 } from "./adapters/sandbox";
 import { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
-import { FileSystemFileHandle } from "./FileSystemFileHandle";
 
 export const config = {
   writable: WritableStream,
@@ -28,32 +27,22 @@ export async function fromDataTransfer(entries: any) {
   return new FileSystemDirectoryHandle(folder);
 }
 
-export async function fromInput(input: HTMLInputElement) {
-  const files = Array.from(input.files!);
-  if (input.webkitdirectory) {
-    const rootName = files[0].webkitRelativePath.split("/", 1)[0];
-    const root = new MemoryFolderHandle(rootName, false);
-    files.forEach((file) => {
-      const path = file.webkitRelativePath.split("/");
-      path.shift();
-      const name = path.pop();
-      const dir = path.reduce((dir: any, path: any) => {
-        if (!dir._entries[path])
-          dir._entries[path] = new MemoryFolderHandle(path, false);
-        return dir._entries[path];
-      }, root);
-      dir._entries[name!] = new MemoryFileHandle(file.name, file, false);
-    });
-    return new FileSystemDirectoryHandle(root);
-  } else {
-    const fileHandles = files.map(
-      (file) =>
-        new FileSystemFileHandle(new MemoryFileHandle(file.name, file, false))
-    );
-    if (input.multiple) {
-      return fileHandles;
-    } else {
-      return fileHandles[0];
-    }
-  }
+export async function fromInput(
+  input: HTMLInputElement
+): Promise<FileSystemDirectoryHandle> {
+  const files = Array.from(input.files!) as any[];
+  const rootName = files[0].webkitRelativePath.split("/", 1)[0];
+  const root = new MemoryFolderHandle(rootName, false);
+  files.forEach((file) => {
+    const path = file.webkitRelativePath.split("/");
+    path.shift();
+    const name = path.pop();
+    const dir = path.reduce((dir: any, path: any) => {
+      if (!dir._entries[path])
+        dir._entries[path] = new MemoryFolderHandle(path, false);
+      return dir._entries[path];
+    }, root);
+    dir._entries[name!] = new MemoryFileHandle(file.name, file, false);
+  });
+  return new FileSystemDirectoryHandle(root);
 }
