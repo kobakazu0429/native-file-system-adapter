@@ -1,5 +1,17 @@
 # Native File System adapter (ponyfill)
 
+This project is fork of [jimmywarting/native-file-system-adapter](https://github.com/jimmywarting/native-file-system-adapter)
+
+## Diferrences
+
+- Drop deno, cache, indexeddb
+- Rewrite TypeScript
+- etc
+
+The information below this is likely out of date.
+
+---
+
 What is this?
 
 This is a file system API that follows the [File System Access](https://wicg.github.io/file-system-access/) specification. Thanks to it we can have a unified way of handling data in all browsers and even in NodeJS & Deno in a more secure way.
