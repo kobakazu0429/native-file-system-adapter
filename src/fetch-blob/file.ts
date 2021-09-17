@@ -4,7 +4,10 @@ export class MyFile extends MyBlob {
   constructor(
     fileBits: any[],
     fileName: string,
-    options: { lastModified?: number; type?: string } = {}
+    options: {
+      lastModified?: number | string | Date | boolean;
+      type?: string;
+    } = {}
   ) {
     super(fileBits, options);
 

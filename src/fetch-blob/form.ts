@@ -6,7 +6,7 @@ import { basename } from "path";
 import { MyBlob } from "./blob";
 import { MyFile } from "./file";
 
-export const blobFrom = async (path: string, type: string) => {
+export const blobFrom = async (path: string, type?: string) => {
   const s = await fs.stat(path);
   return fromBlob(s, path, type);
 };

@@ -7,7 +7,10 @@ export class MyBlob {
    * of the blob consists of the concatenation of the values given
    * in the parameter array.
    */
-  constructor(blobParts: any[] = [], options: { type?: string } = {}) {
+  constructor(
+    blobParts: any[] | Uint8Array = [],
+    options: { type?: string } = {}
+  ) {
     const parts = [];
     let size = 0;
 
