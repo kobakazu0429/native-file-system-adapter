@@ -1,10 +1,5 @@
 import { fromInput } from "./util";
-import type { FileSystemDirectoryHandle as MyFileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
-import type { FileSystemFileHandle as MyFileSystemFileHandle } from "./FileSystemFileHandle";
-
-const def = {
-  accepts: [],
-};
+import type { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
 
 interface Options {
   multiple: boolean;
@@ -14,26 +9,14 @@ interface Options {
 }
 
 export async function showOpenFilePicker(
-  options: Options = {} as Options
-): Promise<
-  | FileSystemDirectoryHandle
-  | FileSystemFileHandle
-  | FileSystemFileHandle[]
-  | MyFileSystemDirectoryHandle
-  | MyFileSystemFileHandle
-  | MyFileSystemFileHandle[]
-> {
-  const opts = { ...def, ...options };
-  // @ts-ignore
-  const native = globalThis.showOpenFilePicker;
-  if (native && !options._preferPolyfill) {
-    return native(opts);
-  }
+  options: Partial<Options> = {}
+): Promise<FileSystemDirectoryHandle> {
+  const opts: Partial<Options> = { accepts: [], ...options };
 
   const input = document.createElement("input");
   input.type = "file";
-  input.multiple = (opts as any).multiple;
-  input.accept = opts.accepts
+  input.multiple = !!opts.multiple;
+  input.accept = (opts.accepts || [])
     .map((e) => [
       ...((e as any).extensions || []).map((e: any) => "." + e),
       ...((e as any).mimeTypes || []),
