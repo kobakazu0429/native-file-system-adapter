@@ -34,6 +34,13 @@ export class FileSystemDirectoryHandle extends FileSystemHandle {
       ];
   }
 
+  async *values(): AsyncGenerator<FileSystemHandle> {
+    for await (const entry of this[kAdapter].values())
+      yield entry.kind === "file"
+        ? new FileSystemFileHandle(entry)
+        : new FileSystemDirectoryHandle(entry);
+  }
+
   async getFileHandle(
     name: string,
     options = { create: false }
