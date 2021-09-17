@@ -995,15 +995,15 @@ describe.each([
   });
 
   test("queryPermission(writable=true) returns granted", async () => {
-    expect(await root.queryPermission({ writable: false })).toBe("granted");
+    expect(await root.queryPermission({ writable: true })).toBe("granted");
   });
 
   test("queryPermission(readable=true) returns granted", async () => {
-    expect(await root.queryPermission({ writable: false })).toBe("granted");
+    expect(await root.queryPermission({ readable: true })).toBe("granted");
   });
 
   test("queryPermission(readable=false) returns granted", async () => {
-    expect(await root.queryPermission({ writable: false })).toBe("granted");
+    expect(await root.queryPermission({ readable: false })).toBe("granted");
   });
 
   test("isSameEntry for identical directory handles returns true", async () => {

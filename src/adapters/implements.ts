@@ -23,7 +23,11 @@ export interface ImplFolderHandle<T = any, U = any> {
   path: string;
   name: string;
 
-  queryPermission: () => "granted";
+  queryPermission?: (options: {
+    readable?: boolean;
+    writable?: boolean;
+  }) => "granted" | "denied";
+
   isSameEntry: (other: any) => boolean;
 
   entries: () => AsyncGenerator<readonly [string, T | U], void, unknown>;

@@ -14,12 +14,12 @@ export class FileSystemHandle {
 
   async queryPermission(
     options: { readable?: boolean; writable?: boolean } = {}
-  ): Promise<string> {
+  ): Promise<"granted" | "denied"> {
     if (options.readable) return "granted";
-    // @ts-ignore
-    return this[kAdapter].queryPermission
-      ? await this[kAdapter].queryPermission(options)
-      : this[kAdapter].writable
+
+    return this.adapter.queryPermission
+      ? this.adapter.queryPermission(options)
+      : this.adapter.writable
       ? "granted"
       : "denied";
   }

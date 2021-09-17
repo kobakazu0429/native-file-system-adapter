@@ -225,10 +225,6 @@ export class FolderHandle
     this._entries = {};
     this.deleted = true;
   }
-
-  public queryPermission() {
-    return "granted" as const;
-  }
 }
 
 export default (_path: string) => new FolderHandle("");
