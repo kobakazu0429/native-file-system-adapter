@@ -30,6 +30,15 @@ const fromFile = (stat: Stats, path: string, type = "") => {
   );
 };
 
+class NotReadableError extends Error {
+  constructor() {
+    super(
+      "The requested file could not be read, typically due to permission problems that have occurred after a reference to a file was acquired."
+    );
+    this.name = "NotReadableError";
+  }
+}
+
 /**
  * This is a blob backed up by a file on the disk
  * with minium requirement. Its wrapped around a Blob as a blobPart
@@ -55,9 +64,7 @@ class BlobDataItem {
   async *stream() {
     const { mtimeMs } = await fs.stat(this.path);
     if (mtimeMs > this.lastModified) {
-      throw new Error(
-        "[NotReadableError] The requested file could not be read, typically due to permission problems that have occurred after a reference to a file was acquired."
-      );
+      throw new NotReadableError();
     }
 
     yield* createReadStream(this.path, {
