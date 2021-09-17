@@ -13,6 +13,7 @@
     }
   },
   "types": "./types/index.d.ts",
+  "sideEffects": false,
   "files": [
     "src",
     "dist",
