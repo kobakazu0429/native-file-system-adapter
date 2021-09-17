@@ -1,13 +1,11 @@
-const kAdapter = Symbol("adapter");
+// import type { ImplFolderHandle } from "./adapters/implements";
+// import type { ImpleFileHandle } from "./adapters/implements";
 
 export class FileSystemHandle {
-  constructor(adapter: FileSystemHandle & { writable: boolean }) {
+  constructor(public adapter: any) {
     this.kind = adapter.kind;
     this.name = adapter.name;
-    this[kAdapter] = adapter;
   }
-
-  [kAdapter]: FileSystemHandle & { writable: boolean };
 
   name: string;
   kind: "file" | "directory";
@@ -26,26 +24,20 @@ export class FileSystemHandle {
 
   async requestPermission(options: { readable?: boolean } = {}) {
     if (options.readable) return "granted";
-    const handle = this[kAdapter];
-    return handle.writable ? "granted" : "denied";
-  }
-
-  /**
-   * Attempts to remove the entry represented by handle from the underlying file system.
-   */
-  async remove(options: { recursive: boolean } = { recursive: false }) {
-    await this[kAdapter].remove(options);
+    return this.adapter.writable ? "granted" : "denied";
   }
 
   async isSameEntry(other: FileSystemHandle): Promise<boolean> {
     if (this === other) return true;
     if (
-      !other ||
       typeof other !== "object" ||
       this.kind !== other.kind ||
-      !other[kAdapter]
-    )
+      !other.adapter
+    ) {
       return false;
+    }
+    return this.adapter.isSameEntry(other.adapter);
+  }
 
   get [Symbol.toStringTag]() {
     return "FileSystemHandle";

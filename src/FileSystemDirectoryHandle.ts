@@ -1,17 +1,13 @@
 import { FileSystemHandle } from "./FileSystemHandle";
 import { FileSystemFileHandle } from "./FileSystemFileHandle";
-
-const kAdapter = Symbol("adapter");
+import { ImplFolderHandle } from "./adapters/implements";
 
 export class FileSystemDirectoryHandle extends FileSystemHandle {
-  constructor(adapter: any) {
+  constructor(public adapter: ImplFolderHandle) {
     super(adapter);
-    this[kAdapter] = adapter;
   }
 
   public kind = "directory" as const;
-
-  [kAdapter]: FileSystemDirectoryHandle;
 
   async getDirectoryHandle(
     name: string,
@@ -22,12 +18,12 @@ export class FileSystemDirectoryHandle extends FileSystemHandle {
       throw new TypeError(`Name contains invalid characters.`);
 
     return new FileSystemDirectoryHandle(
-      await this[kAdapter].getDirectoryHandle(name, options)
+      await this.adapter.getDirectoryHandle(name, options)
     );
   }
 
   async *entries(): AsyncGenerator<[string, FileSystemHandle], void, unknown> {
-    for await (const [, entry] of this[kAdapter].entries())
+    for await (const [, entry] of this.adapter.entries())
       yield [
         entry.name,
         entry.kind === "file"
@@ -37,7 +33,7 @@ export class FileSystemDirectoryHandle extends FileSystemHandle {
   }
 
   async *values(): AsyncGenerator<FileSystemHandle> {
-    for await (const entry of this[kAdapter].values())
+    for await (const [, entry] of this.adapter.entries())
       yield entry.kind === "file"
         ? new FileSystemFileHandle(entry)
         : new FileSystemDirectoryHandle(entry);
@@ -51,7 +47,7 @@ export class FileSystemDirectoryHandle extends FileSystemHandle {
     if (name === "." || name === ".." || name.includes("/"))
       throw new TypeError(`Name contains invalid characters.`);
     return new FileSystemFileHandle(
-      await this[kAdapter].getFileHandle(name, options)
+      await this.adapter.getFileHandle(name, options)
     );
   }
 
@@ -62,7 +58,7 @@ export class FileSystemDirectoryHandle extends FileSystemHandle {
     if (name === "") throw new TypeError(`Name can't be an empty string.`);
     if (name === "." || name === ".." || name.includes("/"))
       throw new TypeError(`Name contains invalid characters.`);
-    return this[kAdapter].removeEntry(name, options);
+    return this.adapter.removeEntry(name, options);
   }
 
   [Symbol.asyncIterator]() {

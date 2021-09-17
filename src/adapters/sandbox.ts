@@ -93,7 +93,7 @@ export class FileHandle {
     return new Promise(this.file.file.bind(this.file));
   }
 
-  createWritable(opts: any): Promise<Sink> {
+  createWritable(opts: { keepExistingData?: boolean } = {}): Promise<Sink> {
     if (!this.writable) throw new NotAllowedError();
 
     return new Promise((resolve, reject) =>
