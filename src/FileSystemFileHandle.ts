@@ -24,16 +24,8 @@ export class FileSystemFileHandle extends FileSystemHandle {
   getFile(): Promise<File> {
     return Promise.resolve(this[kAdapter].getFile());
   }
+
+  get [Symbol.toStringTag]() {
+    return "FileSystemFileHandle";
+  }
 }
-
-Object.defineProperty(FileSystemFileHandle.prototype, Symbol.toStringTag, {
-  value: "FileSystemFileHandle",
-  writable: false,
-  enumerable: false,
-  configurable: true,
-});
-
-Object.defineProperties(FileSystemFileHandle.prototype, {
-  createWritable: { enumerable: true },
-  getFile: { enumerable: true },
-});

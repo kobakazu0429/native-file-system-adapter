@@ -38,22 +38,8 @@ export class FileSystemWritableFileStream extends WritableStream {
     writer.releaseLock();
     return p;
   }
-}
 
-Object.defineProperty(
-  FileSystemWritableFileStream.prototype,
-  Symbol.toStringTag,
-  {
-    value: "FileSystemWritableFileStream",
-    writable: false,
-    enumerable: false,
-    configurable: true,
+  get [Symbol.toStringTag]() {
+    return "FileSystemWritableFileStream";
   }
-);
-
-Object.defineProperties(FileSystemWritableFileStream.prototype, {
-  close: { enumerable: true },
-  seek: { enumerable: true },
-  truncate: { enumerable: true },
-  write: { enumerable: true },
-});
+}

@@ -46,13 +46,8 @@ export class FileSystemHandle {
       !other[kAdapter]
     )
       return false;
-    return this[kAdapter].isSameEntry(other[kAdapter]);
+
+  get [Symbol.toStringTag]() {
+    return "FileSystemHandle";
   }
 }
-
-Object.defineProperty(FileSystemHandle.prototype, Symbol.toStringTag, {
-  value: "FileSystemHandle",
-  writable: false,
-  enumerable: false,
-  configurable: true,
-});

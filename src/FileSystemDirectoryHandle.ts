@@ -68,18 +68,8 @@ export class FileSystemDirectoryHandle extends FileSystemHandle {
   [Symbol.asyncIterator]() {
     return this.entries();
   }
+
+  get [Symbol.toStringTag]() {
+    return "FileSystemDirectoryHandle";
+  }
 }
-
-Object.defineProperty(FileSystemDirectoryHandle.prototype, Symbol.toStringTag, {
-  value: "FileSystemDirectoryHandle",
-  writable: false,
-  enumerable: false,
-  configurable: true,
-});
-
-Object.defineProperties(FileSystemDirectoryHandle.prototype, {
-  getDirectoryHandle: { enumerable: true },
-  entries: { enumerable: true },
-  getFileHandle: { enumerable: true },
-  removeEntry: { enumerable: true },
-});
