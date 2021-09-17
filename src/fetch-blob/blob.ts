@@ -36,9 +36,9 @@ export class MyBlob {
 
     const type = options.type === undefined ? "" : String(options.type);
 
-    this.#type = /^[\x20-\x7E]*$/.test(type) ? type : "";
-    this.#size = size;
-    this.#parts = parts;
+    this.type = /^[\x20-\x7E]*$/.test(type) ? type : "";
+    this.size = size;
+    this.parts = parts;
   }
 
   static [Symbol.hasInstance](object: any) {
@@ -52,24 +52,9 @@ export class MyBlob {
     );
   }
 
-  #parts: Array<MyBlob | Uint8Array> = [];
-  #type = "";
-  #size = 0;
-
-  /**
-   * The Blob interface's size property returns the
-   * size of the Blob in bytes.
-   */
-  get size() {
-    return this.#size;
-  }
-
-  /**
-   * The type property of a Blob object returns the MIME type of the file.
-   */
-  get type() {
-    return this.#type;
-  }
+  public parts: Array<MyBlob | Uint8Array> = [];
+  public type = ""; //the MIME type of the file.
+  public size = 0; // size of the Blob in bytes.
 
   /**
    * The text() method in the Blob interface returns a Promise
@@ -81,7 +66,7 @@ export class MyBlob {
     // that requires twice as much ram
     const decoder = new TextDecoder();
     let str = "";
-    for await (const part of toIterator(this.#parts, false)) {
+    for await (const part of toIterator(this.parts, false)) {
       str += decoder.decode(part, { stream: true });
     }
     // Remaining
@@ -102,7 +87,7 @@ export class MyBlob {
 
     const data = new Uint8Array(this.size);
     let offset = 0;
-    for await (const chunk of toIterator(this.#parts, false)) {
+    for await (const chunk of toIterator(this.parts, false)) {
       data.set(chunk, offset);
       offset += chunk.length;
     }
@@ -111,7 +96,7 @@ export class MyBlob {
   }
 
   stream() {
-    const it = toIterator(this.#parts, true);
+    const it = toIterator(this.parts, true);
 
     return new ReadableStream({
       type: "bytes",
@@ -135,7 +120,7 @@ export class MyBlob {
     let relativeEnd = end < 0 ? Math.max(size + end, 0) : Math.min(end, size);
 
     const span = Math.max(relativeEnd - relativeStart, 0);
-    const parts = this.#parts;
+    const parts = this.parts;
     const blobParts = [];
     let added = 0;
 
@@ -167,8 +152,8 @@ export class MyBlob {
     }
 
     const blob = new MyBlob([], { type: String(type).toLowerCase() });
-    blob.#size = span;
-    blob.#parts = blobParts;
+    blob.size = span;
+    blob.parts = blobParts;
 
     return blob;
   }
