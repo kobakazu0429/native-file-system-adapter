@@ -8,9 +8,21 @@ import {
   TypeMismatchError,
 } from "../errors";
 import { fileFrom } from "../fetch-blob/form";
+import type {
+  ImpleSink,
+  ImpleFileHandle,
+  ImplFolderHandle,
+} from "./implements";
+import type { MyFile } from "../fetch-blob/file";
 
-export class Sink {
-  constructor(public fileHandle: any, public size: number) {}
+type PromiseType<T extends Promise<any>> = T extends Promise<infer P>
+  ? P
+  : never;
+
+type SinkFileHandle = PromiseType<ReturnType<typeof fs.open>>;
+
+export class Sink implements ImpleSink<SinkFileHandle> {
+  constructor(public fileHandle: SinkFileHandle, public size: number) {}
   public position = 0;
 
   async abort() {
@@ -61,7 +73,10 @@ export class Sink {
     } else if (chunk instanceof Blob) {
       // @ts-ignore
       for await (const data of chunk.stream()) {
-        const res = await this.fileHandle.writev([data], this.position);
+        const res = await this.fileHandle.writev(
+          [data as Buffer],
+          this.position
+        );
         this.position += res.bytesWritten;
         this.size += res.bytesWritten;
       }
@@ -78,12 +93,12 @@ export class Sink {
   }
 }
 
-export class FileHandle {
+export class FileHandle implements ImpleFileHandle<Sink, MyFile> {
   constructor(public path: string, public name: string) {}
 
-  public kind = "file";
+  public kind = "file" as const;
 
-  async getFile() {
+  public async getFile() {
     await fs.stat(this.path).catch((err) => {
       if (err.code === "ENOENT") throw new NotFoundError();
       throw err;
@@ -109,16 +124,18 @@ export class FileHandle {
   }
 }
 
-export class FolderHandle {
+export class FolderHandle
+  implements ImplFolderHandle<FileHandle, FolderHandle>
+{
   constructor(public path: string, public name = "") {}
 
-  public kind = "directory";
+  public kind = "directory" as const;
 
-  isSameEntry(other: any) {
+  public isSameEntry(other: any) {
     return this.path === other.path;
   }
 
-  async *entries(): AsyncGenerator<
+  public async *entries(): AsyncGenerator<
     readonly [string, FileHandle | FolderHandle],
     void,
     unknown
@@ -139,7 +156,7 @@ export class FolderHandle {
     }
   }
 
-  async getDirectoryHandle(
+  public async getDirectoryHandle(
     name: string,
     options: { create?: boolean; capture?: boolean } = {}
   ) {
@@ -155,7 +172,7 @@ export class FolderHandle {
     return new FolderHandle(path, name);
   }
 
-  async getFileHandle(name: string, opts: { create?: boolean } = {}) {
+  public async getFileHandle(name: string, opts: { create?: boolean } = {}) {
     const path = join(this.path, name);
     const stat = await fs.lstat(path).catch((err) => {
       if (err.code !== "ENOENT") throw err;
@@ -169,11 +186,11 @@ export class FolderHandle {
     return new FileHandle(path, name);
   }
 
-  async queryPermission() {
-    return "granted";
+  public queryPermission() {
+    return "granted" as const;
   }
 
-  async removeEntry(name: string, opts: { recursive?: boolean }) {
+  public async removeEntry(name: string, opts: { recursive?: boolean }) {
     const path = join(this.path, name);
     const stat = await fs.lstat(path).catch((err) => {
       if (err.code === "ENOENT") throw new NotFoundError();
@@ -197,4 +214,4 @@ export class FolderHandle {
   }
 }
 
-export default (path: any) => new FolderHandle(path);
+export default (path: string) => new FolderHandle(path);

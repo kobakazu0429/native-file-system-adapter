@@ -6,8 +6,9 @@ import {
   SyntaxError,
   TypeMismatchError,
 } from "../errors";
+import { ImpleSink, ImpleFileHandle, ImplFolderHandle } from "./implements";
 
-export class Sink {
+export class Sink implements ImpleSink<FileHandle> {
   constructor(fileHandle: FileHandle) {
     this.fileHandle = fileHandle;
     this.file = fileHandle.file;
@@ -19,6 +20,10 @@ export class Sink {
   file: FileHandle["file"];
   size: FileHandle["file"]["size"];
   position: number;
+
+  async abort() {
+    await this.close();
+  }
 
   write(chunk: any) {
     let file = this.file;
@@ -90,7 +95,8 @@ export class Sink {
 
     this.file = blob;
   }
-  close() {
+
+  async close() {
     if (this.fileHandle.deleted) throw new NotFoundError();
     this.fileHandle.file = this.file;
     // @ts-ignore
@@ -101,7 +107,7 @@ export class Sink {
   }
 }
 
-export class FileHandle {
+export class FileHandle implements ImpleFileHandle<Sink, File> {
   constructor(name = "", file = new File([], name), writable = true) {
     this.file = file;
     this.name = name;
@@ -115,31 +121,34 @@ export class FileHandle {
   name: string;
   readable: boolean;
   writable: boolean;
-  public kind = "file";
+  path = "";
+  public kind = "file" as const;
 
-  getFile() {
+  public async getFile() {
     if (this.deleted) throw new NotFoundError();
     return this.file;
   }
 
-  createWritable(_opts: any) {
+  public async createWritable() {
     if (!this.writable) throw new NotAllowedError();
     if (this.deleted) throw new NotFoundError();
     return new Sink(this);
   }
 
-  isSameEntry(other: any) {
+  public isSameEntry(other: any) {
     return this === other;
   }
 
-  destroy() {
+  public destroy() {
     this.deleted = true;
     // @ts-ignore
     this.file = null;
   }
 }
 
-export class FolderHandle {
+export class FolderHandle
+  implements ImplFolderHandle<FileHandle, FolderHandle>
+{
   constructor(name: string, writable = true) {
     this.name = name;
     this.deleted = false;
@@ -153,18 +162,22 @@ export class FolderHandle {
   deleted: boolean;
   readable: boolean;
   writable: boolean;
-  public kind = "directory";
+  public kind = "directory" as const;
+  public path = "";
 
-  async *entries() {
+  public async *entries() {
     if (this.deleted) throw new NotFoundError();
     yield* Object.entries(this._entries);
   }
 
-  isSameEntry(other: any) {
+  public isSameEntry(other: any) {
     return this === other;
   }
 
-  getDirectoryHandle(name: string, opts = {}) {
+  public async getDirectoryHandle(
+    name: string,
+    options: { create?: boolean; capture?: boolean } = {}
+  ) {
     if (this.deleted) throw new NotFoundError();
     const entry = this._entries[name];
     if (entry) {
@@ -175,7 +188,7 @@ export class FolderHandle {
         return entry;
       }
     } else {
-      if ((opts as any).create) {
+      if (options.create) {
         return (this._entries[name] = new FolderHandle(name));
       } else {
         throw new NotFoundError();
@@ -183,32 +196,39 @@ export class FolderHandle {
     }
   }
 
-  getFileHandle(name: string, opts = {}) {
+  public async getFileHandle(name: string, opts: { create?: boolean }) {
     const entry = this._entries[name];
     const isFile = entry instanceof FileHandle;
     if (entry && isFile) return entry;
     if (entry && !isFile) throw new TypeMismatchError();
-    if (!entry && !(opts as any).create) throw new NotFoundError();
-    if (!entry && (opts as any).create) {
+    if (!entry && !opts.create) throw new NotFoundError();
+    if (!entry && opts.create) {
       return (this._entries[name] = new FileHandle(name));
     }
   }
 
-  removeEntry(name: string, opts: any) {
+  public async removeEntry(
+    name: string,
+    opts: { recursive?: boolean }
+  ): Promise<void> {
     const entry = this._entries[name];
     if (!entry) throw new NotFoundError();
     entry.destroy(opts.recursive);
     delete this._entries[name];
   }
 
-  destroy(recursive: boolean) {
+  public destroy(recursive?: boolean) {
     for (const x of Object.values(this._entries)) {
       if (!recursive) throw new InvalidModificationError();
-      (x as any).destroy(recursive);
+      x.destroy(recursive);
     }
     this._entries = {};
     this.deleted = true;
   }
+
+  public queryPermission() {
+    return "granted" as const;
+  }
 }
 
-export default (_opts: any) => new FolderHandle("");
+export default (_path: string) => new FolderHandle("");
