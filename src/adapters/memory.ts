@@ -101,9 +101,6 @@ export class Sink implements ImpleSink<FileHandle> {
     this.fileHandle.file = this.file;
     // @ts-ignore
     this.file = this.position = this.size = null;
-    if ((this.fileHandle as any).onclose) {
-      (this.fileHandle as any).onclose(this.fileHandle);
-    }
   }
 }
 
