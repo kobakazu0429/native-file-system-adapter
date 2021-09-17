@@ -129,6 +129,7 @@ export class FolderHandle
 {
   constructor(public path: string, public name = "") {}
 
+  public writable = true;
   public kind = "directory" as const;
 
   public isSameEntry(other: any) {

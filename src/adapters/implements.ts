@@ -22,6 +22,7 @@ export interface ImplFolderHandle<T = any, U = any> {
   kind: "directory";
   path: string;
   name: string;
+  writable: boolean;
 
   queryPermission?: (options: {
     readable?: boolean;
