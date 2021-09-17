@@ -1,15 +1,10 @@
 import { FileSystemDirectoryHandle } from "./FileSystemDirectoryHandle";
+import type node from "./adapters/node";
+import type memory from "./adapters/memory";
 
 export async function getOriginPrivateDirectory(
-  driver: any,
-  options = {}
+  driver: typeof node | typeof memory,
+  path = ""
 ): Promise<FileSystemDirectoryHandle> {
-  if (!driver) {
-    return (
-      (window.navigator.storage as any).getDirectory() ||
-      // @ts-ignore
-      globalThis.getOriginPrivateDirectory()
-    );
-  }
-  return new FileSystemDirectoryHandle(driver(options));
+  return new FileSystemDirectoryHandle(driver(path));
 }
