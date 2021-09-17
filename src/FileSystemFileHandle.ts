@@ -9,6 +9,8 @@ export class FileSystemFileHandle extends FileSystemHandle {
     this[kAdapter] = adapter;
   }
 
+  public kind = "file" as const;
+
   [kAdapter]: FileSystemFileHandle;
 
   async createWritable(

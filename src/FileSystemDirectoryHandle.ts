@@ -9,6 +9,8 @@ export class FileSystemDirectoryHandle extends FileSystemHandle {
     this[kAdapter] = adapter;
   }
 
+  public kind = "directory" as const;
+
   [kAdapter]: FileSystemDirectoryHandle;
 
   async getDirectoryHandle(
